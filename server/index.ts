@@ -1,3 +1,1 @@
-import boostrap from './src';
-
-boostrap({ port: 8001 });
+export { default } from './src/server'
