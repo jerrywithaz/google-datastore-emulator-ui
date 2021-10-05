@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "bin": {
-    "google-datastore-emulator-ui": "./dist/scripts/start.js"
+    "google-datastore-emulator-ui": "./dist/start.js"
   },
   "devDependencies": {
     "@types/node": "^16.10.2",
