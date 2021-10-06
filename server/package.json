@@ -2,13 +2,13 @@
   "name": "google-datastore-emulator-ui-server",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./dist/bin/start.js",
+    "start": "node ./lib/bin/start.js",
     "dev": "nodemon scripts/start.ts --port 8000 --id my-project",
-    "build": "rm -rf dist && webpack"
+    "build": "rm -rf lib && tsc -P tsconfig.json"
   },
   "author": "",
   "license": "ISC",

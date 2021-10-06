@@ -2,7 +2,8 @@
   "name": "google-datastore-emulator-ui",
   "version": "1.0.0",
   "description": "",
-  "main": "lib/index.js",
+  "main": "lib/start.js",
+  "types": "lib/start.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve:client": "serve -s client/build",
@@ -11,13 +12,14 @@
     "clean": "rm -rf lib",
     "build": "npm run clean && npm run build:scripts && npm run build:client && npm run build:server",
     "build:scripts": "tsc -P tsconfig.json",
-    "build:client": "cd client && npm run build && mv build ../lib/client",
-    "build:server": "cd server && npm run build && mv dist ../lib/server"
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "postinstall": "cd server && npm install"
   },
   "author": "",
   "license": "ISC",
   "bin": {
-    "google-datastore-emulator-ui": "./dist/start.js"
+    "google-datastore-emulator-ui": "./lib/bin/start.js"
   },
   "devDependencies": {
     "@types/node": "^16.10.2",
