@@ -2,26 +2,29 @@
   "name": "google-datastore-emulator-ui",
   "version": "1.0.0",
   "description": "",
-  "main": "lib/start.js",
-  "types": "lib/start.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve:client": "serve -s client/build",
-    "dev:client": "cd client && npm run start",
-    "dev:server": "nodemon server/scripts/dev.ts",
     "clean": "rm -rf lib",
+    "dev": "ts-node bin/index.ts",
+    "start": "node lib/index.js",
     "build": "npm run clean && npm run build:scripts && npm run build:client && npm run build:server",
+    "postinstall": "cd src/server && npm install",
+    "serve:client": "serve -s src/client/build",
+    "dev:client": "cd src/client && npm run start",
+    "dev:server": "nodemon src/server/scripts/dev.ts",
     "build:scripts": "tsc -P tsconfig.json",
-    "build:client": "cd client && npm run build",
-    "build:server": "cd server && npm run build",
-    "postinstall": "cd server && npm install"
+    "build:client": "cd src/client && npm run build",
+    "build:server": "cd src/server && npm run build"
   },
   "author": "",
   "license": "ISC",
   "bin": {
-    "google-datastore-emulator-ui": "./lib/bin/start.js"
+    "google-datastore-emulator-ui": "./lib/start.js"
   },
   "devDependencies": {
+    "@schemastore/package": "^0.0.6",
     "@types/node": "^16.10.2",
     "nodemon": "^2.0.13",
     "ts-node": "^10.2.1",
