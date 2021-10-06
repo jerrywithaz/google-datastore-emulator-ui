@@ -8,6 +8,7 @@ import useKinds from "../../hooks/useKinds";
 import useEntitiesByKind from "../../hooks/useEntitiesByKind";
 import getColumnHeaders from "../../utils/getColumnHeaders";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { LabelDisplayedRowsArgs } from "@mui/material";
 
 const Entities: React.FC = () => {
   const [kind, setKind] = useState<string>("");
@@ -18,11 +19,20 @@ const Entities: React.FC = () => {
     },
   });
 
-  const { data: entities = [], isLoading: isLoadingEntities } = useEntitiesByKind(kind);
+  const {
+    result: {
+      data: entitiesData,
+      isLoading: isLoadingEntities,
+      refetch: fetchEntities,
+      isRefetching: isRefetchingEntities
+    },
+    changePage,
+    page,
+  } = useEntitiesByKind(kind);
 
   const columnHeaders = useMemo(() => {
-    return getColumnHeaders(entities);
-  }, [entities]);
+    return getColumnHeaders(entitiesData?.entities || []);
+  }, [entitiesData]);
 
   const dataGridColumns = useMemo<GridColDef[]>(() => {
     return columnHeaders.map((columnHeader) => ({
@@ -35,10 +45,10 @@ const Entities: React.FC = () => {
         }
         return params.value;
       },
+      minWidth: 200,
+      resizable: true,
     }));
   }, [columnHeaders]);
-
-  console.log(columnHeaders);
 
   return (
     <Box>
@@ -64,13 +74,30 @@ const Entities: React.FC = () => {
       </FormControl>
       <Box height={600} width="100%" marginTop="20px">
         <DataGrid
-          rows={entities}
+          pagination
+          paginationMode="server"
+          rows={entitiesData?.entities || []}
           columns={dataGridColumns}
           pageSize={25}
+          page={page}
           rowsPerPageOptions={[5, 25, 50, 100]}
           checkboxSelection
           disableSelectionOnClick
-          loading={isLoadingEntities || isLoadingKinds}
+          loading={isLoadingEntities || isLoadingKinds || isRefetchingEntities}
+          onPageChange={(page) => {
+            changePage(page);
+            fetchEntities();
+          }}
+          componentsProps={{
+            pagination: {
+              labelDisplayedRows: ({ page, count, from, to }: LabelDisplayedRowsArgs) => {
+                return `${from}-${to} of many`;
+              },
+              nextIconButtonProps: {
+                disabled: false
+              }
+            }
+          }}
         />
       </Box>
     </Box>

@@ -2,6 +2,7 @@ import express from "express";
 import cors from 'cors';
 import createDatastore from "./datastore";
 import isNullOrUndefined from "./utils/isNullOrUndefined";
+import { RunQueryInfo } from "@google-cloud/datastore/build/src/query";
 
 type BoostrapOptions = {
   projectId: string;
@@ -59,13 +60,23 @@ function boostrap({ projectId, emulatorHost }: BoostrapOptions) {
   app.get("/datastore/entities/:kind", async (req, res) => {
     try {
       const kind = req.params.kind;
-      const query = datastore.createQuery(kind);
+      const pageCursor = req.query.pageCursor as string;
+      let query = datastore.createQuery(kind).limit(25);
+
+      if (pageCursor) {
+        query = query.start(pageCursor);
+      }
+
       const results = await datastore.runQuery(query);
       const entities = results[0].filter(isNullOrUndefined);
+      const info = results[1];
 
       res.contentType("application/json");
       res.status(200);
-      res.send(entities);
+      res.send({
+        info,
+        entities
+      });
     } catch (error) {
       res.status(500);
       res.send(error);
