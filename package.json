@@ -12,7 +12,7 @@
     "dev": "ts-node bin/index.ts",
     "start": "node lib/index.js",
     "build": "npm run clean && npm run build:scripts && npm run build:client && npm run build:server",
-    "postinstall": "cd ./src/server && npm install",
+    "postinstall": "node ./scripts/postinstall.js",
     "prepublishOnly": "npm run build",
     "serve:client": "serve -s src/client/build",
     "dev:client": "cd src/client && npm run start",
