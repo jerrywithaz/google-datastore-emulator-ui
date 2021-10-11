@@ -19,8 +19,6 @@ async function main() {
 
     const program = new Command('google-datastore-emulator-ui');
 
-    console.log(process.argv);
-
     program
         .version(packageJson.version)
         .option('-i, --id <project>', 'The id of the google datastore project.')

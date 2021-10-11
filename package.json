@@ -33,6 +33,5 @@
   "dependencies": {
     "commander": "^8.2.0",
     "serve": "^12.0.1"
-  },
-  "files": ["bin", "lib", "src/server/lib", "src/client/build"]
+  }
 }
