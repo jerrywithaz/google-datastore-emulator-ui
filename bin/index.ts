@@ -4,6 +4,7 @@ import { spawn, SpawnOptionsWithoutStdio } from "child_process";
 import { Command } from 'commander';
 import assert from "assert";
 import { JSONSchemaForNPMPackageJsonFiles } from '@schemastore/package'
+import { join } from "path";
 
 const { default: boostrapServer } = require('../src/server');
 
@@ -53,7 +54,7 @@ async function main() {
     
     function startClient() {
         if (DEV_MODE) spawnProcess(`npm run dev:client`);
-        else spawnProcess(`npm run serve:client`);
+        else spawnProcess(`serve -s ${join(__dirname, '..', 'src', 'client', 'build')}`);
     }
     
     function startServer() {
