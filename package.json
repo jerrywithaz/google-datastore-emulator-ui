@@ -35,7 +35,7 @@
     "commander": "^8.2.0",
     "serve": "^12.0.1"
   },
-  "files": ["lib", "src/server/index.js", "src/server/package.json", "src/server/lib", "src/client/build"],
+  "files": ["lib", "src/server/index.js", "scripts", "src/server/package.json", "src/server/lib", "src/client/build"],
   "repository": {
     "type": "git",
     "url": "https://github.com/jerrywithaz/google-datastore-emulator-ui"
