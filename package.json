@@ -1,6 +1,6 @@
 {
   "name": "google-datastore-emulator-ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -20,9 +20,7 @@
   },
   "author": "",
   "license": "ISC",
-  "bin": {
-    "google-datastore-emulator-ui": "./lib/start.js"
-  },
+  "bin": "./lib/index.js",
   "devDependencies": {
     "@schemastore/package": "^0.0.6",
     "@types/node": "^16.10.2",
