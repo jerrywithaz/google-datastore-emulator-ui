@@ -8,4 +8,3 @@ function createDatastore() {
     });
 }
 exports.default = createDatastore;
-//# sourceMappingURL=datastore.js.map

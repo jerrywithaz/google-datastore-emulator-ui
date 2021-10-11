@@ -7,4 +7,3 @@ function isNullOrUndefined(item) {
     return true;
 }
 exports.default = isNullOrUndefined;
-//# sourceMappingURL=isNullOrUndefined.js.map

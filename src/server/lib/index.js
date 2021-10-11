@@ -6,4 +6,3 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = void 0;
 var src_1 = require("./src");
 Object.defineProperty(exports, "default", { enumerable: true, get: function () { return __importDefault(src_1).default; } });
-//# sourceMappingURL=index.js.map

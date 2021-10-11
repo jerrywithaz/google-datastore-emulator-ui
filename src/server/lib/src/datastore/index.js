@@ -6,4 +6,3 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = void 0;
 var datastore_1 = require("./datastore");
 Object.defineProperty(exports, "default", { enumerable: true, get: function () { return __importDefault(datastore_1).default; } });
-//# sourceMappingURL=index.js.map
