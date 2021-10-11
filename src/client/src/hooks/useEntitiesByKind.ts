@@ -19,29 +19,33 @@ type UseEntitiesByKindOptions =
     >
   | undefined;
 
-async function getEntitiesByKind(kind: string, pageCursor?: string) {
+async function getEntitiesByKind(kind: string, page: number, pageSize: number) {
   const result = await api.get<Result>(`/datastore/entities/${kind}`, {
-    params: pageCursor ? { pageCursor } : undefined
+    params: { page, pageSize }
   });
 
   return result.data;
 }
 
 function useEntitiesByKind(kind: string, options?: UseEntitiesByKindOptions) {
-  const [pageCursor, setPageCursor] = useState<string>('');
+  // const [pageCursor, setPageCursor] = useState<string>('');
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [rowCount, setRowCount] = useState(pageSize);
 
-  const result = useQuery(["entitiesByKind", kind, page.toString()], () => getEntitiesByKind(kind, pageCursor), {
+  const result = useQuery(["entitiesByKind", kind, page.toString(), pageSize.toString()], () => getEntitiesByKind(kind, page, pageSize), {
     ...options,
     enabled: !!kind,
     onSuccess: (data) => {
-      if (data.info.endCursor) {
-        setPageCursor(data.info.endCursor);
+      const { moreResults } = data.info;
+
+      if (moreResults === 'MORE_RESULTS_AFTER_LIMIT' || moreResults === 'MORE_RESULTS_AFTER_CURSOR') {
+        setRowCount((page + 2) * pageSize);
       }
     },
   });
 
-  return { result, changePage: setPage, page };
+  return { result, changePage: setPage, page, setPageSize, pageSize, rowCount };
 }
 
 export default useEntitiesByKind;

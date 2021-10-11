@@ -28,6 +28,9 @@ const Entities: React.FC = () => {
     },
     changePage,
     page,
+    pageSize,
+    setPageSize,
+    rowCount
   } = useEntitiesByKind(kind);
 
   const columnHeaders = useMemo(() => {
@@ -46,7 +49,6 @@ const Entities: React.FC = () => {
         return params.value;
       },
       minWidth: 200,
-      resizable: true,
     }));
   }, [columnHeaders]);
 
@@ -77,10 +79,11 @@ const Entities: React.FC = () => {
           pagination
           paginationMode="server"
           rows={entitiesData?.entities || []}
+          rowCount={rowCount}
           columns={dataGridColumns}
-          pageSize={25}
+          pageSize={pageSize}
           page={page}
-          rowsPerPageOptions={[5, 25, 50, 100]}
+          rowsPerPageOptions={[5, 10, 25, 50, 100]}
           checkboxSelection
           disableSelectionOnClick
           loading={isLoadingEntities || isLoadingKinds || isRefetchingEntities}
@@ -88,9 +91,10 @@ const Entities: React.FC = () => {
             changePage(page);
             fetchEntities();
           }}
+          onPageSizeChange={setPageSize}
           componentsProps={{
             pagination: {
-              labelDisplayedRows: ({ page, count, from, to }: LabelDisplayedRowsArgs) => {
+              labelDisplayedRows: ({ from, to }: LabelDisplayedRowsArgs) => {
                 return `${from}-${to} of many`;
               },
               nextIconButtonProps: {

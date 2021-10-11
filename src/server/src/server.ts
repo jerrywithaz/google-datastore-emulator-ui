@@ -60,12 +60,14 @@ function boostrap({ projectId, emulatorHost }: BoostrapOptions) {
   app.get("/datastore/entities/:kind", async (req, res) => {
     try {
       const kind = req.params.kind;
-      const pageCursor = req.query.pageCursor as string;
-      let query = datastore.createQuery(kind).limit(25);
+      // const pageCursor = req.query.pageCursor as string;
+      const page = Number(req.query.page as string);
+      const pageSize = Number(req.query.pageSize as string);
+      let query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
 
-      if (pageCursor) {
-        query = query.start(pageCursor);
-      }
+      // if (pageCursor) {
+      //   query = query.start(pageCursor);
+      // }
 
       const results = await datastore.runQuery(query);
       const entities = results[0].filter(isNullOrUndefined);

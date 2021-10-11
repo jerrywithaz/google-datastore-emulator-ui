@@ -28,5 +28,6 @@
     "@google-cloud/datastore": "^6.5.0",
     "cors": "^2.8.5",
     "express": "^4.17.1"
-  }
+  },
+  "files": []
 }

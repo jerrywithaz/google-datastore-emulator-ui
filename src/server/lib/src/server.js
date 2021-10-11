@@ -107,20 +107,26 @@ function boostrap(_a) {
         });
     }); });
     app.get("/datastore/entities/:kind", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-        var kind, query, results, entities, error_3;
+        var kind, page, pageSize, query, results, entities, info, error_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     kind = req.params.kind;
-                    query = datastore.createQuery(kind);
+                    page = Number(req.query.page);
+                    pageSize = Number(req.query.pageSize);
+                    query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
                     return [4 /*yield*/, datastore.runQuery(query)];
                 case 1:
                     results = _a.sent();
                     entities = results[0].filter(isNullOrUndefined_1.default);
+                    info = results[1];
                     res.contentType("application/json");
                     res.status(200);
-                    res.send(entities);
+                    res.send({
+                        info: info,
+                        entities: entities
+                    });
                     return [3 /*break*/, 3];
                 case 2:
                     error_3 = _a.sent();

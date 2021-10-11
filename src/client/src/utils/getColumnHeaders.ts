@@ -11,7 +11,20 @@ function getColumnHeaders(data: Record<string, unknown>[]) {
         })
     });
 
-    return headers.sort();
+
+    headers.sort();
+
+    const indexOfId = headers.findIndex((header) => header.toLowerCase() === 'id');
+
+    if (indexOfId > -1) {
+        const header = headers[indexOfId];
+
+        headers.splice(indexOfId, 1);
+
+        headers.unshift(header);
+    }
+
+    return headers;
 }
 
 export default getColumnHeaders;
