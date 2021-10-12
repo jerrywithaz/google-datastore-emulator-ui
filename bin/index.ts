@@ -13,7 +13,7 @@ import * as path from 'path';
 const { default: boostrapServer } = require('../src/server');
 
 function outputServerConfigToClient(port: number, isDev: boolean) {
-    const clientPath = path.resolve(process.cwd(), 'src', 'client');
+    const clientPath = path.resolve(__dirname, '..', 'src', 'client');
 
     const configPath = path.resolve(clientPath, isDev ? 'public' : 'build', 'server_config.json');
 
