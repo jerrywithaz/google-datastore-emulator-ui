@@ -135,16 +135,18 @@ const Entities: React.FC = () => {
         }}
       >
         <Box padding="20px">
-        <Typography variant="h6">View Entity</Typography>
-        {entity && Object.keys(entity).sort().filter(removeKey).map((key) => {
-          return (
-            <Box key={key} padding="5px 0px">
-              <Typography fontWeight="bold">{key}</Typography>
-              <Typography>{renderToString(entity[key])}</Typography>
-            </Box>
-          )
-        })}
-          </Box>
+          <Typography variant="h6">View Entity</Typography>
+          {entity && Object.keys(entity).sort().filter(removeKey).map((key) => {
+            return (
+              <Box key={key} padding="5px 0px">
+                <Typography fontWeight="bold">{key}</Typography>
+                <Box maxHeight={300} overflow="auto" maxWidth="100%">
+                  <Typography>{renderToString(entity[key])}</Typography>
+                </Box>
+              </Box>
+            )
+          })}
+        </Box>
       </Drawer>
     </Box>
   );
