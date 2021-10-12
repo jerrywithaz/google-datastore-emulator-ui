@@ -20,7 +20,7 @@ yarn global add google-datastore-emulator-ui
 Run 
 
 ```sh
-google-datastore-emulator-ui -p my-project-id -e http://localhost:8097
+google-datastore-emulator-ui -i my-project-id -e http://localhost:8097
 ```
 
 ## Cli Options
@@ -35,4 +35,5 @@ Commands:
 
   -i, --id, id                          The id of your google datastore instance
   -e, --emulator-host, emulator host    The host url of your local emulator such as http://localhost:8003
+  -p, --port <port>, express app port   The port for express to run on such as 8002
 ```
