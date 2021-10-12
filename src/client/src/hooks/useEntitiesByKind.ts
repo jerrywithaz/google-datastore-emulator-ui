@@ -32,7 +32,7 @@ async function getEntitiesByKind(kind: string, page: number, pageSize: number) {
     entities: entities.map((entity) => {
       return {
         ...entity,
-        id: entity.id ?? `auto set: ${uuid()}`,
+        id: entity.id ?? entity?.__key__ ?? `set by client: ${uuid()}`,
       }
     })
   };

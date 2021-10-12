@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -119,7 +130,7 @@ function boostrap(_a) {
                     return [4 /*yield*/, datastore.runQuery(query)];
                 case 1:
                     results = _a.sent();
-                    entities = results[0].filter(isNullOrUndefined_1.default);
+                    entities = results[0].filter(isNullOrUndefined_1.default).map(function (e) { return (__assign(__assign({}, e), { __key__: e[datastore.KEY].name })); });
                     info = results[1];
                     res.contentType("application/json");
                     res.status(200);

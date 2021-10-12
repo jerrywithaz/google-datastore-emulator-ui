@@ -17,15 +17,17 @@ function getColumnHeaders(data: Record<string, unknown>[]) {
     const indexOfId = headers.findIndex((header) => header.toLowerCase() === 'id');
 
     if (indexOfId > -1) {
-        const header = headers[indexOfId];
-
         headers.splice(indexOfId, 1);
 
-        headers.unshift(header);
+        headers.unshift('id');
     }
     else {
         headers.unshift('id');
     }
+
+    const indexOfKey = headers.findIndex((header) => header.toLowerCase() === '__key__');
+
+    if (indexOfKey > -1) headers.splice(indexOfKey, 1);
 
     return headers;
 }

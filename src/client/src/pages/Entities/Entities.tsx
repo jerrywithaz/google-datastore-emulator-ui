@@ -48,12 +48,6 @@ const Entities: React.FC = () => {
         }
         return params.value;
       },
-      valueGetter: (params) => {
-        if (columnHeader === 'id') {
-          return params.value ?? Math.random();
-        }
-        return params.value;
-      },
       minWidth: 200,
     }));
   }, [columnHeaders]);
@@ -98,9 +92,9 @@ const Entities: React.FC = () => {
             fetchEntities();
           }}
           getRowId={(rowData) => {
-            return rowData.id
+            return rowData.__key__ ?? rowData.id;
           }}
-          rowHeight={25}
+          rowHeight={40}
           onPageSizeChange={setPageSize}
           componentsProps={{
             pagination: {
@@ -112,6 +106,7 @@ const Entities: React.FC = () => {
               }
             }
           }}
+          filterModel={{ items: []}}
         />
       </Box>
     </Box>
