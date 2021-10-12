@@ -24,9 +24,5 @@
     "webpack-cli": "^4.8.0",
     "webpack-node-externals": "^3.0.0"
   },
-  "dependencies": {
-    "@google-cloud/datastore": "^6.5.0",
-    "cors": "^2.8.5",
-    "express": "^4.17.1"
-  }
+  "dependencies": {}
 }
