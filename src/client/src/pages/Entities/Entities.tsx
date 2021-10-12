@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from "react";
-import Box from "@mui/material/Box";
-import Select from "@mui/material/Select";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
+import Box from "@material-ui/core/Box";
+import Select from "@material-ui/core/Select";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
 import useKinds from "../../hooks/useKinds";
 import useEntitiesByKind from "../../hooks/useEntitiesByKind";
 import getColumnHeaders from "../../utils/getColumnHeaders";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { LabelDisplayedRowsArgs } from "@mui/material";
+import { LabelDisplayedRowsArgs } from "@material-ui/core";
 
 const Entities: React.FC = () => {
   const [kind, setKind] = useState<string>("");

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+require('dotenv').config();
+
 import { spawn, SpawnOptionsWithoutStdio } from "child_process";
 import { Command } from 'commander';
 import assert from "assert";
@@ -22,9 +24,10 @@ async function main() {
 
     program
         .version(packageJson.version)
-        .option('-i, --id <project>', 'The id of the google datastore project.')
-        .option('-e, --emulator-host <host>', 'The url of the emulator')
-        .option('-D, --dev', 'Run in dev mode')
+        .option('-i, --id <project>', 'The id of the google datastore project.', process.env.PROJECT_ID)
+        .option('-e, --emulator-host <host>', 'The url of the emulator', process.env.DATASTORE_EMULATOR_HOST)
+        .option('-p, --port <port>', 'The port to run the express server on', process.env.SERVER_PORT || '8002')
+        .option('-D, --dev', 'Run in dev mode', process.env.NODE_ENV === 'development')
         .parse(process.argv);
     
     const options = program.opts();
@@ -39,6 +42,7 @@ async function main() {
     const DEV_MODE = Boolean(options.dev);
     const PROJECT_ID = options.id;
     const DATASTORE_EMULATOR_HOST = options.emulatorHost;
+    const PORT = Number(options.port);
     
     function spawnProcess(command: string, options?: SpawnOptionsWithoutStdio) {
       const child_process = spawn(command, {
@@ -59,10 +63,10 @@ async function main() {
     
     function startServer() {
         if (DEV_MODE) {
-            spawnProcess(`PROJECT_ID=${PROJECT_ID} DATASTORE_EMULATOR_HOST=${DATASTORE_EMULATOR_HOST} npm run dev:server`);
+            spawnProcess(`PROJECT_ID=${PROJECT_ID} DATASTORE_EMULATOR_HOST=${DATASTORE_EMULATOR_HOST} PORT=${PORT} npm run dev:server`);
         }
         else {
-            boostrapServer({ projectId: PROJECT_ID, emulatorHost: DATASTORE_EMULATOR_HOST });
+            boostrapServer({ projectId: PROJECT_ID, emulatorHost: DATASTORE_EMULATOR_HOST, port: PORT });
         }
     }
     

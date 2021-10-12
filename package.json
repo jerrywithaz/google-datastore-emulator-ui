@@ -1,6 +1,6 @@
 {
   "name": "google-datastore-emulator-ui",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -9,7 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rm -rf lib",
-    "dev": "ts-node bin/index.ts",
+    "dev": "NODE_ENV=development ts-node bin/index.ts",
     "start": "node lib/index.js",
     "build": "npm run clean && npm run build:scripts && npm run build:client && npm run build:server",
     "prepublishOnly": "npm run build",
@@ -18,7 +18,11 @@
     "dev:server": "nodemon src/server/scripts/dev.ts",
     "build:scripts": "tsc -P tsconfig.json",
     "build:client": "cd src/client && npm run build",
-    "build:server": "cd src/server && npm run build"
+    "build:server": "cd src/server && npm run build",
+    "gcloud:emulator:start": "node ./scripts/gcloud_datastore start",
+    "gcloud:emulator:stop": "node ./scripts/gcloud_datastore stop",
+    "gcloud:emulator:import": "node ./scripts/gcloud_datastore import",
+    "gcloud:emulator:download": "node ./scripts/gcloud_datastore download"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +30,7 @@
   "devDependencies": {
     "@schemastore/package": "^0.0.6",
     "@types/node": "^16.10.2",
+    "got": "^11.8.2",
     "nodemon": "^2.0.13",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3"
@@ -34,6 +39,7 @@
     "@google-cloud/datastore": "^6.5.0",
     "commander": "^8.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "serve": "^12.0.1"
   },

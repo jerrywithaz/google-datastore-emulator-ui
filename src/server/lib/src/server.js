@@ -54,16 +54,21 @@ var express_1 = __importDefault(require("express"));
 var cors_1 = __importDefault(require("cors"));
 var datastore_1 = __importDefault(require("./datastore"));
 var isNullOrUndefined_1 = __importDefault(require("./utils/isNullOrUndefined"));
-var port = 8002;
-function boostrap(_a) {
-    var _this = this;
-    var projectId = _a.projectId, emulatorHost = _a.emulatorHost;
+function setEnv(_a) {
+    var projectId = _a.projectId, emulatorHost = _a.emulatorHost, port = _a.port;
     process.env.PROJECT_ID = projectId;
     process.env.DATASTORE_EMULATOR_HOST = emulatorHost;
+    process.env.SERVER_PORT = port.toString();
+}
+function boostrap(_a) {
+    var _this = this;
+    var projectId = _a.projectId, emulatorHost = _a.emulatorHost, port = _a.port;
+    setEnv({ projectId: projectId, emulatorHost: emulatorHost, port: port });
     console.log('PROJECT_ID', projectId);
     console.log('DATASTORE_EMULATOR_HOST', emulatorHost);
     var app = (0, express_1.default)();
     var datastore = (0, datastore_1.default)();
+    app.enable('trust proxy');
     app.use((0, cors_1.default)());
     app.get("/datastore/namespaces", function (_, res) { return __awaiter(_this, void 0, void 0, function () {
         var query, results, namespaces, error_1;
@@ -124,13 +129,13 @@ function boostrap(_a) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     kind = req.params.kind;
-                    page = Number(req.query.page);
-                    pageSize = Number(req.query.pageSize);
+                    page = Number(req.query.page) || 0;
+                    pageSize = Number(req.query.pageSize) || 25;
                     query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
                     return [4 /*yield*/, datastore.runQuery(query)];
                 case 1:
                     results = _a.sent();
-                    entities = results[0].filter(isNullOrUndefined_1.default).map(function (e) { return (__assign(__assign({}, e), { __key__: e[datastore.KEY].name })); });
+                    entities = results[0].filter(isNullOrUndefined_1.default).map(function (e) { return (__assign(__assign({}, e), { __key__: e[datastore.KEY].name || e[datastore.KEY].id })); });
                     info = results[1];
                     res.contentType("application/json");
                     res.status(200);
@@ -141,6 +146,7 @@ function boostrap(_a) {
                     return [3 /*break*/, 3];
                 case 2:
                     error_3 = _a.sent();
+                    console.log(error_3);
                     res.status(500);
                     res.send(error_3);
                     return [3 /*break*/, 3];
@@ -150,6 +156,7 @@ function boostrap(_a) {
     }); });
     app.listen(port, function () {
         console.log("Listening on port: " + port);
+        console.log("Server available at: http://localhost:" + port);
     });
 }
 exports.default = boostrap;

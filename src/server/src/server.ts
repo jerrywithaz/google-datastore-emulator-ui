@@ -2,24 +2,29 @@ import express from "express";
 import cors from 'cors';
 import createDatastore from "./datastore";
 import isNullOrUndefined from "./utils/isNullOrUndefined";
-import { RunQueryInfo } from "@google-cloud/datastore/build/src/query";
 
 type BoostrapOptions = {
   projectId: string;
   emulatorHost: string;
+  port: number;
 };
 
-const port = 8002;
-
-function boostrap({ projectId, emulatorHost }: BoostrapOptions) {
+function setEnv({ projectId, emulatorHost, port }: BoostrapOptions) {
   process.env.PROJECT_ID = projectId;
   process.env.DATASTORE_EMULATOR_HOST = emulatorHost;
+  process.env.SERVER_PORT = port.toString();
+}
+
+function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
+  setEnv({ projectId, emulatorHost, port });
 
   console.log('PROJECT_ID', projectId);
   console.log('DATASTORE_EMULATOR_HOST', emulatorHost);
 
   const app = express();
   const datastore = createDatastore();
+
+  app.enable('trust proxy');
 
   app.use(cors());
 
@@ -60,17 +65,12 @@ function boostrap({ projectId, emulatorHost }: BoostrapOptions) {
   app.get("/datastore/entities/:kind", async (req, res) => {
     try {
       const kind = req.params.kind;
-      // const pageCursor = req.query.pageCursor as string;
-      const page = Number(req.query.page as string);
-      const pageSize = Number(req.query.pageSize as string);
+      const page = Number(req.query.page as string) || 0;
+      const pageSize = Number(req.query.pageSize as string) || 25;
       const query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
 
-      // if (pageCursor) {
-      //   query = query.start(pageCursor);
-      // }
-
       const results = await datastore.runQuery(query);
-      const entities = results[0].filter(isNullOrUndefined).map((e) => ({ ...e, __key__: e[datastore.KEY].name}));
+      const entities = results[0].filter(isNullOrUndefined).map((e) => ({ ...e, __key__: e[datastore.KEY].name || e[datastore.KEY].id}));
       const info = results[1];
 
       res.contentType("application/json");
@@ -80,6 +80,7 @@ function boostrap({ projectId, emulatorHost }: BoostrapOptions) {
         entities,
       });
     } catch (error) {
+      console.log(error);
       res.status(500);
       res.send(error);
     }
@@ -87,6 +88,7 @@ function boostrap({ projectId, emulatorHost }: BoostrapOptions) {
 
   app.listen(port, () => {
     console.log(`Listening on port: ${port}`);
+    console.log(`Server available at: http://localhost:${port}`);
   });
 }
 

@@ -1,12 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
+import AppBar from "@material-ui/core/AppBar";
+import Box from "@material-ui/core/Box";
+import Toolbar from "@material-ui/core/Toolbar";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ReactQueryProvider from "./providers/ReactQueryProvider";
 import Entities from "./pages/Entities";
@@ -31,7 +31,6 @@ const App: React.FC = () => {
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                   Google Datastore Emulator UI
                 </Typography>
-                <Button color="inherit">Login</Button>
               </Toolbar>
             </AppBar>
           </Box>
