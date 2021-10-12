@@ -12,7 +12,6 @@
     "dev": "ts-node bin/index.ts",
     "start": "node lib/index.js",
     "build": "npm run clean && npm run build:scripts && npm run build:client && npm run build:server",
-    "postinstall": "node scripts/postinstall.js",
     "prepublishOnly": "npm run build",
     "serve:client": "serve -s src/client/build",
     "dev:client": "cd src/client && npm run start",
@@ -32,10 +31,19 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "@google-cloud/datastore": "^6.5.0",
     "commander": "^8.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
     "serve": "^12.0.1"
   },
-  "files": ["lib", "src/server/index.js", "scripts", "src/server/package.json", "src/server/lib", "src/client/build"],
+  "files": [
+    "lib",
+    "src/server/index.js",
+    "src/server/package.json",
+    "src/server/lib",
+    "src/client/build"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/jerrywithaz/google-datastore-emulator-ui"
