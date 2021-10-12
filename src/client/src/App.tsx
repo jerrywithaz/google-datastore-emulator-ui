@@ -78,7 +78,4 @@ const App: React.FC = () => {
 };
 
 export default App;
-function setLoading(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
 

@@ -7,8 +7,29 @@ import { Command } from 'commander';
 import assert from "assert";
 import { JSONSchemaForNPMPackageJsonFiles } from '@schemastore/package'
 import { join } from "path";
+import * as fs from 'fs';
+import * as path from 'path';
 
 const { default: boostrapServer } = require('../src/server');
+
+function outputServerConfigToClient(port: number, isDev: boolean) {
+    const clientPath = path.resolve(process.cwd(), 'src', 'client');
+
+    const configPath = path.resolve(clientPath, isDev ? 'public' : 'build', 'server_config.json');
+
+    console.log('Located client server config at: ', configPath);
+
+    const config = JSON.parse(fs.readFileSync(configPath).toString());
+
+    const newConfig = {
+        ...config,
+        port
+    };
+
+    console.log('Updating client server config at: ', configPath, newConfig);
+
+    fs.writeFileSync(configPath, JSON.stringify(newConfig));
+}
 
 async function getPackageJson(): Promise<JSONSchemaForNPMPackageJsonFiles> {
     return require('../package.json');
@@ -44,6 +65,8 @@ async function main() {
     const DATASTORE_EMULATOR_HOST = options.emulatorHost;
     const PORT = Number(options.port);
     
+    outputServerConfigToClient(PORT, DEV_MODE);
+
     function spawnProcess(command: string, options?: SpawnOptionsWithoutStdio) {
       const child_process = spawn(command, {
         shell: true,

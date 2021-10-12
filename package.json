@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rm -rf lib",
     "dev": "NODE_ENV=development ts-node bin/index.ts",
-    "start": "node lib/index.js",
+    "start": "NODE_ENV=production node lib/index.js",
     "build": "npm run clean && npm run build:scripts && npm run build:client && npm run build:server",
     "prepublishOnly": "npm run build",
     "serve:client": "serve -s src/client/build",

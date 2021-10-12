@@ -17,7 +17,7 @@ function setEnv({ projectId, emulatorHost, port }: BoostrapOptions) {
 
 function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
   setEnv({ projectId, emulatorHost, port });
-
+  
   console.log('PROJECT_ID', projectId);
   console.log('DATASTORE_EMULATOR_HOST', emulatorHost);
 
