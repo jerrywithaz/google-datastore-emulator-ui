@@ -77,7 +77,7 @@ function boostrap({ projectId, emulatorHost }: BoostrapOptions) {
       res.status(200);
       res.send({
         info,
-        entities
+        entities,
       });
     } catch (error) {
       res.status(500);

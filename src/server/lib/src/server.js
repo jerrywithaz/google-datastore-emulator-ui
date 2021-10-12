@@ -125,7 +125,7 @@ function boostrap(_a) {
                     res.status(200);
                     res.send({
                         info: info,
-                        entities: entities
+                        entities: entities,
                     });
                     return [3 /*break*/, 3];
                 case 2:

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, UseQueryOptions } from "react-query";
+import { v4 as uuid } from 'uuid';
 import api from "../api";
 
 type RunQueryInfo = {
@@ -24,7 +25,17 @@ async function getEntitiesByKind(kind: string, page: number, pageSize: number) {
     params: { page, pageSize }
   });
 
-  return result.data;
+  const { info, entities } = result.data;
+
+  return {
+    info,
+    entities: entities.map((entity) => {
+      return {
+        ...entity,
+        id: entity.id ?? `auto set: ${uuid()}`,
+      }
+    })
+  };
 }
 
 function useEntitiesByKind(kind: string, options?: UseEntitiesByKindOptions) {

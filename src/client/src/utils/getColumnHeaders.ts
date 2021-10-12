@@ -23,6 +23,9 @@ function getColumnHeaders(data: Record<string, unknown>[]) {
 
         headers.unshift(header);
     }
+    else {
+        headers.unshift('id');
+    }
 
     return headers;
 }
