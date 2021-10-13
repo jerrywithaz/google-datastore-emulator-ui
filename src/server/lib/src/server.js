@@ -123,16 +123,18 @@ function boostrap(_a) {
         });
     }); });
     app.get("/datastore/entities/:kind", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-        var kind, page, pageSize, filters, query, i, _a, property, operator, value, results, entities, info, error_3;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var kind, page, pageSize, filters, sortModel, query, i, _a, property, operator, value, i, _b, field, sort, results, entities, info, error_3;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
-                    _b.trys.push([0, 2, , 3]);
+                    _c.trys.push([0, 2, , 3]);
                     kind = req.params.kind;
                     page = Number(req.query.page) || 0;
                     pageSize = Number(req.query.pageSize) || 25;
                     filters = req.query.filters;
+                    sortModel = req.query.sortModel;
                     query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
+                    // Build filters
                     if ((filters === null || filters === void 0 ? void 0 : filters.length) && Array.isArray(filters)) {
                         for (i = 0; i < filters.length; i++) {
                             _a = JSON.parse(filters[i]), property = _a[0], operator = _a[1], value = _a[2];
@@ -141,10 +143,20 @@ function boostrap(_a) {
                             }
                         }
                     }
+                    // Build sort model
+                    if ((sortModel === null || sortModel === void 0 ? void 0 : sortModel.length) && Array.isArray(sortModel)) {
+                        for (i = 0; i < sortModel.length; i++) {
+                            _b = JSON.parse(sortModel[i]), field = _b.field, sort = _b.sort;
+                            query = query.order(field, {
+                                descending: sort === 'desc',
+                            });
+                        }
+                    }
                     return [4 /*yield*/, datastore.runQuery(query)];
                 case 1:
-                    results = _b.sent();
-                    entities = results[0].filter(isNullOrUndefined_1.default).map(function (e) { return (__assign(__assign({}, e), { __key__: e[datastore.KEY].name || e[datastore.KEY].id })); });
+                    results = _c.sent();
+                    entities = results[0].filter(isNullOrUndefined_1.default)
+                        .map(function (e) { return (__assign(__assign({}, e), { __key__: e[datastore.KEY].name || e[datastore.KEY].id })); });
                     info = results[1];
                     res.contentType("application/json");
                     res.status(200);
@@ -154,7 +166,7 @@ function boostrap(_a) {
                     });
                     return [3 /*break*/, 3];
                 case 2:
-                    error_3 = _b.sent();
+                    error_3 = _c.sent();
                     res.status(500);
                     res.send(error_3);
                     return [3 /*break*/, 3];

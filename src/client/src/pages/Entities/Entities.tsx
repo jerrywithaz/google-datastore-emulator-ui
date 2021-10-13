@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Box from "@material-ui/core/Box";
 import Select from "@material-ui/core/Select";
 import FormControl from "@material-ui/core/FormControl";
@@ -10,7 +10,7 @@ import Button from "@material-ui/core/Button";
 import useKinds from "../../hooks/useKinds";
 import useEntitiesByKind from "../../hooks/useEntitiesByKind";
 import getColumnHeaders from "../../utils/getColumnHeaders";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
 import { LabelDisplayedRowsArgs } from "@material-ui/core";
 import renderToString from "../../utils/renderToString";
 import Filter from "../../components/Filter";
@@ -24,6 +24,7 @@ const Entities: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [entity, setEntity] = useState<Record<string, any> | null>(null);
   const [filters, setFilters] = useState<[any, any, any][]>([]);
+  const [sortModel, setSortModel] = useState<GridSortModel | null>(null);
 
   const { data: kinds = [], isLoading: isLoadingKinds } = useKinds({
     onSuccess: (data) => {
@@ -43,7 +44,7 @@ const Entities: React.FC = () => {
     pageSize,
     setPageSize,
     rowCount,
-  } = useEntitiesByKind(kind, filters);
+  } = useEntitiesByKind(kind, filters, sortModel);
 
   const columnHeaders = useMemo(() => {
     return getColumnHeaders(entitiesData?.entities || []);
@@ -70,6 +71,10 @@ const Entities: React.FC = () => {
       value: columnHeader,
     }));
   }, [columnHeaders]);
+
+  useEffect(() => {
+    if (kind && sortModel) fetchEntities();
+  }, [sortModel, kind]);
 
   return (
     <Box>
@@ -118,6 +123,7 @@ const Entities: React.FC = () => {
         <DataGrid
           pagination
           paginationMode="server"
+          sortingMode="server"
           rows={entitiesData?.entities || []}
           rowCount={rowCount}
           columns={dataGridColumns}
@@ -146,11 +152,11 @@ const Entities: React.FC = () => {
               },
             },
           }}
-          filterModel={{ items: [] }}
           onRowClick={(params) => {
             setDrawerOpen(true);
             setEntity(params.row);
           }}
+          onSortModelChange={setSortModel}
         />
       </Box>
       <Drawer

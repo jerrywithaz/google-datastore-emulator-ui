@@ -2,6 +2,7 @@ import express from "express";
 import cors from 'cors';
 import createDatastore from "./datastore";
 import isNullOrUndefined from "./utils/isNullOrUndefined";
+import { Operator } from "@google-cloud/datastore/build/src/query";
 
 type BoostrapOptions = {
   projectId: string;
@@ -17,7 +18,7 @@ function setEnv({ projectId, emulatorHost, port }: BoostrapOptions) {
 
 function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
   setEnv({ projectId, emulatorHost, port });
-  
+
   console.log('PROJECT_ID', projectId);
   console.log('DATASTORE_EMULATOR_HOST', emulatorHost);
 
@@ -68,20 +69,34 @@ function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
       const page = Number(req.query.page as string) || 0;
       const pageSize = Number(req.query.pageSize as string) || 25;
       const filters = req.query.filters;
+      const sortModel = req.query.sortModel;
       let query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
 
+      // Build filters
       if (filters?.length && Array.isArray(filters)) {
         for (let i = 0; i < filters.length; i++) {
-          const [property, operator, value] = JSON.parse(filters[i] as string) as [any, any, any];
-          
+          const [property, operator, value] = JSON.parse(filters[i] as string) as [string, Operator, string | number];
+
           if (value) {
             query = query.filter(property, operator, value)
           }
         }
       }
 
+      // Build sort model
+      if (sortModel?.length && Array.isArray(sortModel)) {
+        for (let i = 0; i < sortModel.length; i++) {
+          const {field, sort} = JSON.parse(sortModel[i] as string) as { field: string, sort: string };
+
+          query = query.order(field, {
+            descending: sort === 'desc',
+          });
+        }
+      }
+
       const results = await datastore.runQuery(query);
-      const entities = results[0].filter(isNullOrUndefined).map((e) => ({ ...e, __key__: e[datastore.KEY].name || e[datastore.KEY].id}));
+      const entities = results[0].filter(isNullOrUndefined)
+        .map((e) => ({ ...e, __key__: e[datastore.KEY].name || e[datastore.KEY].id }));
       const info = results[1];
 
       res.contentType("application/json");

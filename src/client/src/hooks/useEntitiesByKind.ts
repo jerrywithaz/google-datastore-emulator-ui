@@ -1,3 +1,4 @@
+import { GridSortModel } from "@mui/x-data-grid";
 import { useState } from "react";
 import { useQuery, UseQueryOptions } from "react-query";
 import { v4 as uuid } from 'uuid';
@@ -20,10 +21,9 @@ type UseEntitiesByKindOptions =
     >
   | undefined;
 
-async function getEntitiesByKind(kind: string, page: number, pageSize: number, filters: [any, any, any][]) {
-  console.log(filters);
+async function getEntitiesByKind(kind: string, page: number, pageSize: number, filters: [any, any, any][], sortModel: GridSortModel | null) {
   const result = await api.get<Result>(`/datastore/entities/${kind}`, {
-    params: { page, pageSize, filters }
+    params: { page, pageSize, filters, sortModel }
   });
 
   const { info, entities } = result.data;
@@ -39,12 +39,12 @@ async function getEntitiesByKind(kind: string, page: number, pageSize: number, f
   };
 }
 
-function useEntitiesByKind(kind: string, filters: [any, any, any][], options?: UseEntitiesByKindOptions) {
+function useEntitiesByKind(kind: string, filters: [any, any, any][], sortModel: GridSortModel | null, options?: UseEntitiesByKindOptions) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [rowCount, setRowCount] = useState(pageSize);
 
-  const result = useQuery(["entitiesByKind", kind, page.toString(), pageSize.toString()], () => getEntitiesByKind(kind, page, pageSize, filters), {
+  const result = useQuery(["entitiesByKind", kind, page.toString(), pageSize.toString()], () => getEntitiesByKind(kind, page, pageSize, filters, sortModel), {
     ...options,
     enabled: !!kind,
     onSuccess: (data) => {
