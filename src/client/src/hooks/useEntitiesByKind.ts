@@ -20,9 +20,10 @@ type UseEntitiesByKindOptions =
     >
   | undefined;
 
-async function getEntitiesByKind(kind: string, page: number, pageSize: number) {
+async function getEntitiesByKind(kind: string, page: number, pageSize: number, filters: [any, any, any][]) {
+  console.log(filters);
   const result = await api.get<Result>(`/datastore/entities/${kind}`, {
-    params: { page, pageSize }
+    params: { page, pageSize, filters }
   });
 
   const { info, entities } = result.data;
@@ -38,13 +39,12 @@ async function getEntitiesByKind(kind: string, page: number, pageSize: number) {
   };
 }
 
-function useEntitiesByKind(kind: string, options?: UseEntitiesByKindOptions) {
-  // const [pageCursor, setPageCursor] = useState<string>('');
+function useEntitiesByKind(kind: string, filters: [any, any, any][], options?: UseEntitiesByKindOptions) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [rowCount, setRowCount] = useState(pageSize);
 
-  const result = useQuery(["entitiesByKind", kind, page.toString(), pageSize.toString()], () => getEntitiesByKind(kind, page, pageSize), {
+  const result = useQuery(["entitiesByKind", kind, page.toString(), pageSize.toString()], () => getEntitiesByKind(kind, page, pageSize, filters), {
     ...options,
     enabled: !!kind,
     onSuccess: (data) => {

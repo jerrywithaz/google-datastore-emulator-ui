@@ -6,21 +6,24 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Drawer from "@material-ui/core/Drawer";
 import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
 import useKinds from "../../hooks/useKinds";
 import useEntitiesByKind from "../../hooks/useEntitiesByKind";
 import getColumnHeaders from "../../utils/getColumnHeaders";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { LabelDisplayedRowsArgs } from "@material-ui/core";
 import renderToString from "../../utils/renderToString";
+import Filter from "../../components/Filter";
 
 function removeKey(key: string) {
-  return key !== '__key__';
+  return key !== "__key__";
 }
 
 const Entities: React.FC = () => {
   const [kind, setKind] = useState<string>("");
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [entity, setEntity] = useState<Record<string, any> | null>(null);
+  const [filters, setFilters] = useState<[any, any, any][]>([]);
 
   const { data: kinds = [], isLoading: isLoadingKinds } = useKinds({
     onSuccess: (data) => {
@@ -33,14 +36,14 @@ const Entities: React.FC = () => {
       data: entitiesData,
       isLoading: isLoadingEntities,
       refetch: fetchEntities,
-      isRefetching: isRefetchingEntities
+      isRefetching: isRefetchingEntities,
     },
     changePage,
     page,
     pageSize,
     setPageSize,
-    rowCount
-  } = useEntitiesByKind(kind);
+    rowCount,
+  } = useEntitiesByKind(kind, filters);
 
   const columnHeaders = useMemo(() => {
     return getColumnHeaders(entitiesData?.entities || []);
@@ -61,6 +64,13 @@ const Entities: React.FC = () => {
     }));
   }, [columnHeaders]);
 
+  const filterOptions = useMemo(() => {
+    return columnHeaders.map((columnHeader) => ({
+      label: columnHeader,
+      value: columnHeader,
+    }));
+  }, [columnHeaders]);
+
   return (
     <Box>
       <FormControl>
@@ -73,6 +83,7 @@ const Entities: React.FC = () => {
           label="Kinds"
           labelId="kinds-select-label"
           id="kinds-select"
+          size="small"
         >
           {kinds.map((kind) => {
             return (
@@ -83,6 +94,26 @@ const Entities: React.FC = () => {
           })}
         </Select>
       </FormControl>
+      <Box marginTop="12px">
+        <Filter
+          options={filterOptions}
+          onChange={(option, operator, value) => {
+            setFilters([[option, operator, value]]);
+          }}
+          defaultOption={filterOptions[0].label}
+        />
+      </Box>
+      
+      <Button
+        color="primary"
+        variant="contained"
+        style={{ marginTop: 12 }}
+        onClick={() => {
+          fetchEntities();
+        }}
+      >
+        Apply Filters
+      </Button>
       <Box height={600} width="100%" marginTop="20px">
         <DataGrid
           pagination
@@ -111,9 +142,9 @@ const Entities: React.FC = () => {
                 return `${from}-${to} of many`;
               },
               nextIconButtonProps: {
-                disabled: false
-              }
-            }
+                disabled: false,
+              },
+            },
           }}
           filterModel={{ items: [] }}
           onRowClick={(params) => {
@@ -131,21 +162,25 @@ const Entities: React.FC = () => {
           setEntity(null);
         }}
         sx={{
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 300 },
+          "& .MuiDrawer-paper": { boxSizing: "border-box", width: 300 },
         }}
       >
         <Box padding="20px">
           <Typography variant="h6">View Entity</Typography>
-          {entity && Object.keys(entity).sort().filter(removeKey).map((key) => {
-            return (
-              <Box key={key} padding="5px 0px">
-                <Typography fontWeight="bold">{key}</Typography>
-                <Box maxHeight={300} overflow="auto" maxWidth="100%">
-                  <Typography>{renderToString(entity[key])}</Typography>
-                </Box>
-              </Box>
-            )
-          })}
+          {entity &&
+            Object.keys(entity)
+              .sort()
+              .filter(removeKey)
+              .map((key) => {
+                return (
+                  <Box key={key} padding="5px 0px">
+                    <Typography fontWeight="bold">{key}</Typography>
+                    <Box maxHeight={300} overflow="auto" maxWidth="100%">
+                      <Typography>{renderToString(entity[key])}</Typography>
+                    </Box>
+                  </Box>
+                );
+              })}
         </Box>
       </Drawer>
     </Box>

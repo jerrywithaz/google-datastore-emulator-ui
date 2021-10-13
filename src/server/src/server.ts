@@ -67,7 +67,18 @@ function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
       const kind = req.params.kind;
       const page = Number(req.query.page as string) || 0;
       const pageSize = Number(req.query.pageSize as string) || 25;
-      const query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
+      const filters = req.query.filters;
+      let query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
+
+      if (filters?.length && Array.isArray(filters)) {
+        for (let i = 0; i < filters.length; i++) {
+          const [property, operator, value] = JSON.parse(filters[i] as string) as [any, any, any];
+          
+          if (value) {
+            query = query.filter(property, operator, value)
+          }
+        }
+      }
 
       const results = await datastore.runQuery(query);
       const entities = results[0].filter(isNullOrUndefined).map((e) => ({ ...e, __key__: e[datastore.KEY].name || e[datastore.KEY].id}));
@@ -80,7 +91,6 @@ function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
         entities,
       });
     } catch (error) {
-      console.log(error);
       res.status(500);
       res.send(error);
     }
