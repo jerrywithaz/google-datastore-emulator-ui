@@ -123,18 +123,27 @@ function boostrap(_a) {
         });
     }); });
     app.get("/datastore/entities/:kind", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-        var kind, page, pageSize, query, results, entities, info, error_3;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var kind, page, pageSize, filters, query, i, _a, property, operator, value, results, entities, info, error_3;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
+                    _b.trys.push([0, 2, , 3]);
                     kind = req.params.kind;
                     page = Number(req.query.page) || 0;
                     pageSize = Number(req.query.pageSize) || 25;
+                    filters = req.query.filters;
                     query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
+                    if ((filters === null || filters === void 0 ? void 0 : filters.length) && Array.isArray(filters)) {
+                        for (i = 0; i < filters.length; i++) {
+                            _a = JSON.parse(filters[i]), property = _a[0], operator = _a[1], value = _a[2];
+                            if (value) {
+                                query = query.filter(property, operator, value);
+                            }
+                        }
+                    }
                     return [4 /*yield*/, datastore.runQuery(query)];
                 case 1:
-                    results = _a.sent();
+                    results = _b.sent();
                     entities = results[0].filter(isNullOrUndefined_1.default).map(function (e) { return (__assign(__assign({}, e), { __key__: e[datastore.KEY].name || e[datastore.KEY].id })); });
                     info = results[1];
                     res.contentType("application/json");
@@ -145,8 +154,7 @@ function boostrap(_a) {
                     });
                     return [3 /*break*/, 3];
                 case 2:
-                    error_3 = _a.sent();
-                    console.log(error_3);
+                    error_3 = _b.sent();
                     res.status(500);
                     res.send(error_3);
                     return [3 /*break*/, 3];
