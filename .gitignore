@@ -26,3 +26,4 @@ yarn.lock
 .config
 gcloud_datastore/backups
 gcloud_datastore/WEB-INF
+server_config.json

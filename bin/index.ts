@@ -17,18 +17,13 @@ function outputServerConfigToClient(port: number, isDev: boolean) {
 
     const configPath = path.resolve(clientPath, isDev ? 'public' : 'build', 'server_config.json');
 
-    console.log('Located client server config at: ', configPath);
-
-    const config = JSON.parse(fs.readFileSync(configPath).toString());
-
-    const newConfig = {
-        ...config,
+    const config = {
         port
     };
 
-    console.log('Updating client server config at: ', configPath, newConfig);
+    console.log('Updating client server config at: ', configPath, config);
 
-    fs.writeFileSync(configPath, JSON.stringify(newConfig));
+    fs.writeFileSync(configPath, JSON.stringify(config));
 }
 
 async function getPackageJson(): Promise<JSONSchemaForNPMPackageJsonFiles> {
