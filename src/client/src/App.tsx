@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import json from 'react-syntax-highlighter/dist/esm/languages/hljs/json';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 import AppBar from "@material-ui/core/AppBar";
@@ -12,6 +14,8 @@ import ReactQueryProvider from "./providers/ReactQueryProvider";
 import Entities from "./pages/Entities";
 import axios from "axios";
 import api from "./api";
+
+SyntaxHighlighter.registerLanguage('json', json);
 
 const url = process.env.PUBLIC_URL + '/server_config.json';
 

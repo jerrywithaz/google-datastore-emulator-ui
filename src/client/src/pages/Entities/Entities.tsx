@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/docco';
 import Box from "@material-ui/core/Box";
 import Select from "@material-ui/core/Select";
 import FormControl from "@material-ui/core/FormControl";
@@ -12,8 +14,8 @@ import useEntitiesByKind from "../../hooks/useEntitiesByKind";
 import getColumnHeaders from "../../utils/getColumnHeaders";
 import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
 import { LabelDisplayedRowsArgs } from "@material-ui/core";
-import renderToString from "../../utils/renderToString";
 import Filter from "../../components/Filter";
+import { isObject } from "../../utils/is";
 
 function removeKey(key: string) {
   return key !== "__key__";
@@ -74,6 +76,7 @@ const Entities: React.FC = () => {
 
   useEffect(() => {
     if (kind && sortModel) fetchEntities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortModel, kind]);
 
   return (
@@ -108,7 +111,7 @@ const Entities: React.FC = () => {
           defaultOption={filterOptions[0].label}
         />
       </Box>
-      
+
       <Button
         color="primary"
         variant="contained"
@@ -168,7 +171,7 @@ const Entities: React.FC = () => {
           setEntity(null);
         }}
         sx={{
-          "& .MuiDrawer-paper": { boxSizing: "border-box", width: 300 },
+          "& .MuiDrawer-paper": { boxSizing: "border-box", width: 400 },
         }}
       >
         <Box padding="20px">
@@ -178,11 +181,18 @@ const Entities: React.FC = () => {
               .sort()
               .filter(removeKey)
               .map((key) => {
+                console.log(entity[key]);
                 return (
                   <Box key={key} padding="5px 0px">
                     <Typography fontWeight="bold">{key}</Typography>
                     <Box maxHeight={300} overflow="auto" maxWidth="100%">
-                      <Typography>{renderToString(entity[key])}</Typography>
+                      {isObject(entity[key]) ? (
+                        <SyntaxHighlighter language="json" style={docco}>
+                          {JSON.stringify(entity[key], null, 2)}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <Typography>{entity[key]}</Typography>
+                      )}
                     </Box>
                   </Box>
                 );
