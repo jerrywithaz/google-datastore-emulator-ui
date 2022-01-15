@@ -6,8 +6,8 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./lib/bin/start.js",
-    "dev": "nodemon scripts/start.ts --port 8000 --id my-project",
+    "start": "node ./lib/bin/dev.js",
+    "dev": "nodemon scripts/dev.ts --port 8000 --id my-project",
     "build": "rm -rf lib && tsc -P tsconfig.json"
   },
   "author": "",

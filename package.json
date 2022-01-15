@@ -16,7 +16,7 @@
     "serve:client": "serve -s src/client/build",
     "dev:client": "cd src/client && npm run start",
     "dev:server": "nodemon src/server/scripts/dev.ts",
-    "build:scripts": "tsc -P tsconfig.json",                                  
+    "build:scripts": "tsc -P tsconfig.json",
     "build:client": "cd src/client && npm run build",
     "build:server": "cd src/server && npm run build",
     "gcloud:emulator:start": "node ./scripts/gcloud_datastore start",
@@ -37,11 +37,18 @@
   },
   "dependencies": {
     "@google-cloud/datastore": "^6.5.0",
+    "apollo-server-core": "^3.6.1",
+    "apollo-server-express": "^3.6.1",
+    "class-validator": "^0.13.2",
     "commander": "^8.2.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "serve": "^12.0.1"
+    "graphql": "^15.3.0",
+    "graphql-type-json": "^0.3.2",
+    "reflect-metadata": "^0.1.13",
+    "serve": "^12.0.1",
+    "type-graphql": "^1.1.1"
   },
   "files": [
     "lib",
