@@ -14,84 +14,81 @@ function isOperator(value: any): value is Operator {
   return false;
 }
 
-export const FilterScalar = new GraphQLScalarType({
-  name: "ObjectId",
-  description: "Google datastore filter scalar type",
-  serialize(value: unknown): [string, string, string] {
-    if (!Array.isArray(value)) {
-      throw new Error("FilterScalar must be an array");
-    }
+export class FilterType extends String {
+  private type: 'string' | 'number';
 
-    return value as any; // value sent to the client
-  },
-  parseValue(value: unknown): [string, string, string] {
-    // check the type of received value
-    if (!Array.isArray(value)) {
-      throw new Error("FilterScalar must be an array");
-    }
-    if (value.length === 3) {
-      throw new Error("FilterScalar must have 3 values in the array");
-    }
+  constructor(value: string | number) {
+    super(value);
+    this.type = typeof value as 'string' | 'number';
+  }
 
-    console.log(value);
+  public toString(): string {
+    return super.toString()
+  }
 
-    return value as any; // value from the client input variables
-  },
-  parseLiteral(ast): [string, string, string] {
-    // check the type of received value
-    if (ast.kind !== Kind.LIST) {
-      throw new Error("FilterScalar can only parse list values");
-    }
-    return ast.values as any; // value from the client query
-  },
-});
+  public getValue(): string | number {
+    return this.type === 'string' ? this.toString() : Number(this.toString())
+  }
 
-export const OperatorValue = new GraphQLScalarType({
-  name: "OperatorValue",
-  description: "Google datastore filter value scalar type",
+  public toJSON(): string {
+    return this.toString();
+  }
+}
+
+export class OperatorType extends String {
+  override toString(): Operator {
+    return super.toString() as Operator;
+  }
+
+  toJSON(): Operator {
+    return this.toString();
+  }
+}
+
+export const OperatorScalar = new GraphQLScalarType({
+  name: "OperatorScalar",
+  description: "Google datastore operator value scalar type",
   serialize(value: unknown): Operator {
+    if (!(value instanceof OperatorType)) {
+      throw new Error("OperatorScalar can only serialize OperatorType values");
+    }
+    return value.toString();
+  },
+  parseValue(value: unknown): OperatorType {
     if (typeof value === "string" && isOperator(value)) {
-      return value; // value sent to the client
+      return new OperatorType(value); // value sent to the client
     } else {
-      throw new Error("OperatorValue must be a string or a number");
+      throw new Error(`OperatorScalar must be one of ${operators.join(",")}`);
     }
   },
-  parseValue(value: unknown): Operator {
-    if (typeof value === "string" && isOperator(value)) {
-      return value; // value sent to the client
-    } else {
-      throw new Error("OperatorValue must be a string or a number");
-    }
-  },
-  parseLiteral(ast): Operator {
+  parseLiteral(ast): OperatorType {
     if (ast.kind === Kind.STRING && isOperator(ast.value)) {
-      return ast.value;
+      return new OperatorType(ast.value);
     } else {
-      throw new Error("OperatorValue can only parse a string or a number");
+      throw new Error(`OperatorScalar must be one of ${operators.join(",")}`);
     }
   },
 });
 
-export const FilterValue = new GraphQLScalarType({
-  name: "FilterValue",
-  description: "Google datastore filter value scalar type",
+export const FilterScalar = new GraphQLScalarType({
+  name: "FilterScalar",
+  description: "Google datastore query filter scalar type",
   serialize(value: unknown): string | number {
+    if (!(value instanceof FilterType)) {
+      throw new Error("FilterScalar can only serialize FilterType values");
+    }
+    return value.getValue();
+  },
+  parseValue(value: unknown): FilterType {
     if (typeof value === "string" || typeof value === "number") {
-      return value; // value sent to the client
+      return new FilterType(value); // value sent to the client
     } else {
       throw new Error("FilterScalar must be a string or a number");
     }
   },
-  parseValue(value: unknown): string | number {
-    if (typeof value === "string" || typeof value === "number") {
-      return value; // value sent to the client
-    } else {
-      throw new Error("FilterScalar must be a string or a number");
-    }
-  },
-  parseLiteral(ast): string | number {
+  parseLiteral(ast): FilterType {
     if (ast.kind === Kind.INT || ast.kind === Kind.STRING) {
-      return ast.value;
+      return new FilterType(ast.value);
     } else {
       throw new Error("FilterScalar can only parse a string or a number");
     }

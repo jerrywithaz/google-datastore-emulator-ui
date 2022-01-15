@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/docco';
+import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+import docco from "react-syntax-highlighter/dist/esm/styles/hljs/docco";
 import Box from "@material-ui/core/Box";
 import Select from "@material-ui/core/Select";
 import FormControl from "@material-ui/core/FormControl";
@@ -12,10 +12,11 @@ import Button from "@material-ui/core/Button";
 import useKinds from "../../hooks/useKinds";
 import useEntitiesByKind from "../../hooks/useEntitiesByKind";
 import getColumnHeaders from "../../utils/getColumnHeaders";
-import { DataGrid, GridColDef, GridSortModel } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { LabelDisplayedRowsArgs } from "@material-ui/core";
 import Filter from "../../components/Filter";
 import { isObject } from "../../utils/is";
+import { FilterModel, SortModel } from "../../types/graphql";
 
 function removeKey(key: string) {
   return key !== "__key__";
@@ -25,32 +26,45 @@ const Entities: React.FC = () => {
   const [kind, setKind] = useState<string>("");
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [entity, setEntity] = useState<Record<string, any> | null>(null);
-  const [filters, setFilters] = useState<[any, any, any][]>([]);
-  const [sortModel, setSortModel] = useState<GridSortModel | null>(null);
+  const [filters, setFilters] = useState<FilterModel[]>([]);
+  const [sortModel, setSortModel] = useState<SortModel[] | null>(null);
 
-  const { data: kinds = [], isLoading: isLoadingKinds } = useKinds({
-    onSuccess: (data) => {
-      if (!kind) setKind(data[0]);
+  const { data: kindsData, loading: isLoadingKinds } = useKinds({
+    onCompleted: (data) => {
+      if (!kind) setKind(data.getKinds[0]);
     },
   });
 
+  const { getKinds: kinds } = kindsData || { getKinds: [] };
+
   const {
-    result: {
-      data: entitiesData,
-      isLoading: isLoadingEntities,
-      refetch: fetchEntities,
-      isRefetching: isRefetchingEntities,
-    },
+    result: [
+      fetchEntities,
+      { data: getEntitiesData, loading: isLoadingEntities },
+    ],
     changePage,
     page,
     pageSize,
     setPageSize,
     rowCount,
-  } = useEntitiesByKind(kind, filters, sortModel);
+  } = useEntitiesByKind({ kind, filters, sortModel });
+
+  const { getEntities: entitiesData } = getEntitiesData || {
+    getEntities: { entities: [] },
+  };
+
+  const entities = useMemo(() => {
+    if (entitiesData?.entities) {
+      return entitiesData?.entities.map(({ entity, key }) => {
+        return { ...entity, id: key }
+      })
+    }
+    return [];
+  }, [entitiesData.entities]);
 
   const columnHeaders = useMemo(() => {
-    return getColumnHeaders(entitiesData?.entities || []);
-  }, [entitiesData]);
+    return getColumnHeaders(entities);
+  }, [entities]);
 
   const dataGridColumns = useMemo<GridColDef[]>(() => {
     return columnHeaders.map((columnHeader) => ({
@@ -61,6 +75,7 @@ const Entities: React.FC = () => {
         if (Array.isArray(params.value) || typeof params.value === "object") {
           return JSON.stringify(params.value);
         }
+        if (params.value === undefined) return '-';
         return params.value;
       },
       minWidth: 200,
@@ -75,7 +90,7 @@ const Entities: React.FC = () => {
   }, [columnHeaders]);
 
   useEffect(() => {
-    if (kind && sortModel) fetchEntities();
+    if (kind) fetchEntities();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortModel, kind]);
 
@@ -106,7 +121,9 @@ const Entities: React.FC = () => {
         <Filter
           options={filterOptions}
           onChange={(option, operator, value) => {
-            setFilters([[option, operator, value]]);
+            if (value) {
+              setFilters([{ property: option, operator, value } as FilterModel]);
+            }
           }}
           defaultOption={filterOptions[0].label}
         />
@@ -127,7 +144,7 @@ const Entities: React.FC = () => {
           pagination
           paginationMode="server"
           sortingMode="server"
-          rows={entitiesData?.entities || []}
+          rows={entities}
           rowCount={rowCount}
           columns={dataGridColumns}
           pageSize={pageSize}
@@ -135,7 +152,7 @@ const Entities: React.FC = () => {
           rowsPerPageOptions={[5, 10, 25, 50, 100]}
           checkboxSelection={false}
           disableSelectionOnClick
-          loading={isLoadingEntities || isLoadingKinds || isRefetchingEntities}
+          loading={isLoadingEntities || isLoadingKinds}
           onPageChange={(page) => {
             changePage(page);
             fetchEntities();
@@ -159,7 +176,9 @@ const Entities: React.FC = () => {
             setDrawerOpen(true);
             setEntity(params.row);
           }}
-          onSortModelChange={setSortModel}
+          onSortModelChange={(sortModel) =>
+            setSortModel(sortModel as SortModel[])
+          }
         />
       </Box>
       <Drawer
@@ -181,7 +200,6 @@ const Entities: React.FC = () => {
               .sort()
               .filter(removeKey)
               .map((key) => {
-                console.log(entity[key]);
                 return (
                   <Box key={key} padding="5px 0px">
                     <Typography fontWeight="bold">{key}</Typography>

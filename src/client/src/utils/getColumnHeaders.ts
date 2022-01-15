@@ -5,12 +5,11 @@ function getColumnHeaders(data: Record<string, unknown>[]) {
         const keys = Object.keys(item);
 
         keys.forEach((key) => {
-            if (!headers.includes(key)) {
+            if (key !== '__typename' && !headers.includes(key)) {
                 headers.push(key)
             }
         })
     });
-
 
     headers.sort();
 

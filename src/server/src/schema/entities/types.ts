@@ -1,7 +1,6 @@
-import { Field, InputType, ObjectType, registerEnumType } from "type-graphql";
+import { Field, Float, InputType, Int, ObjectType, registerEnumType } from "type-graphql";
 import { GraphQLJSONObject } from "graphql-type-json";
-import { FilterValue, OperatorValue } from "./scalars";
-import { Operator } from "@google-cloud/datastore/build/src/query";
+import { FilterScalar, OperatorType, OperatorScalar, FilterType } from "./scalars";
 
 export enum OperatorEnum {
   "=" = "=",
@@ -20,15 +19,15 @@ export enum MoreResultsEnum {
   "NO_MORE_RESULTS" = "NO_MORE_RESULTS",
 }
 
-registerEnumType(MoreResultsEnum, {
+registerEnumType(OperatorEnum, {
   name: "OperatorEnum", // this one is mandatory
   description: "The supported operators by google datastore", // this one is optional
 });
 
 registerEnumType(MoreResultsEnum, {
-    name: "MoreResultsEnum", // this one is mandatory
-    description: "The list of more results values from google datastore", // this one is optional
-  });
+  name: "MoreResultsEnum", // this one is mandatory
+  description: "The list of more results values from google datastore", // this one is optional
+});
 
 @ObjectType()
 export class RunQueryInfo {
@@ -62,11 +61,11 @@ export class FilterModel {
   @Field()
   property!: string;
 
-  @Field(() => OperatorValue)
-  operator!: OperatorEnum;
+  @Field(() => OperatorScalar)
+  operator!: OperatorType;
 
-  @Field(() => FilterValue)
-  readonly value!: string;
+  @Field(() => FilterScalar)
+  readonly value!: FilterType;
 }
 
 @InputType()
@@ -77,3 +76,22 @@ export class SortModel {
   @Field()
   sort!: string;
 }
+
+@InputType()
+export class GetEntitiesInput {
+  @Field()
+  kind!: string;
+
+  @Field(() => Int, { nullable: true, defaultValue: 0 })
+  page!: number;
+
+  @Field(() => Int, { nullable: true, defaultValue: 25 })
+  pageSize!: number;
+
+  @Field(() => [FilterModel], { nullable: true, defaultValue: [] })
+  filters!: FilterModel[];
+
+  @Field(() => [SortModel], { nullable: true, defaultValue: [] })
+  sortModel!: SortModel[];
+}
+

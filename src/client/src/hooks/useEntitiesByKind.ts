@@ -1,56 +1,38 @@
-import { GridSortModel } from "@mui/x-data-grid";
+import { gql, useLazyQuery } from "@apollo/client";
 import { useState } from "react";
-import { useQuery, UseQueryOptions } from "react-query";
-import { v4 as uuid } from 'uuid';
-import api from "../api";
+import { EntitiesResult, GetEntitiesInput } from "../types/graphql";
 
-type RunQueryInfo = {
-  endCursor?: string;
-  moreResults?: 'MORE_RESULTS_TYPE_UNSPECIFIED' | 'NOT_FINISHED' | 'MORE_RESULTS_AFTER_LIMIT' | 'MORE_RESULTS_AFTER_CURSOR' | 'NO_MORE_RESULTS';
-}
-
-type Result = {
-  info: RunQueryInfo;
-  entities: Record<string, unknown>[];
-};
-
-type UseEntitiesByKindOptions =
-  | Omit<
-      UseQueryOptions<unknown, unknown, Result, string[]>,
-      "queryKey" | "queryFn"
-    >
-  | undefined;
-
-async function getEntitiesByKind(kind: string, page: number, pageSize: number, filters: [any, any, any][], sortModel: GridSortModel | null) {
-  const result = await api.get<Result>(`/datastore/entities/${kind}`, {
-    params: { page, pageSize, filters, sortModel }
-  });
-
-  const { info, entities } = result.data;
-
-  return {
-    info,
-    entities: entities.map((entity) => {
-      return {
-        ...entity,
-        id: entity.id ?? entity?.__key__ ?? `set by client: ${uuid()}`,
+const GET_ENTITIES_BY_KIND = gql`
+  query GetEntities($input: GetEntitiesInput!) {
+    getEntities(input: $input) {
+      entities {
+        entity
+        key
       }
-    })
-  };
-}
+      info {
+        moreResults
+        endCursor
+      }
+    }
+  }
+`;
 
-function useEntitiesByKind(kind: string, filters: [any, any, any][], sortModel: GridSortModel | null, options?: UseEntitiesByKindOptions) {
+function useEntitiesByKind(
+  input: GetEntitiesInput,
+) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [rowCount, setRowCount] = useState(pageSize);
 
-  const result = useQuery(["entitiesByKind", kind, page.toString(), pageSize.toString()], () => getEntitiesByKind(kind, page, pageSize, filters, sortModel), {
-    ...options,
-    enabled: !!kind,
-    onSuccess: (data) => {
-      const { moreResults } = data.info;
+  const result = useLazyQuery<{ getEntities: EntitiesResult }, { input: GetEntitiesInput }>(GET_ENTITIES_BY_KIND, {
+    variables: { input: { ...input, page, pageSize } },
+    onCompleted: (data) => {
+      const { moreResults } = data.getEntities.info;
 
-      if (moreResults === 'MORE_RESULTS_AFTER_LIMIT' || moreResults === 'MORE_RESULTS_AFTER_CURSOR') {
+      if (
+        moreResults === "MORE_RESULTS_AFTER_LIMIT" ||
+        moreResults === "MORE_RESULTS_AFTER_CURSOR"
+      ) {
         setRowCount((page + 2) * pageSize);
       }
     },

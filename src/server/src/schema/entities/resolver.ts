@@ -1,17 +1,13 @@
 import { Arg, Ctx, Query, Resolver } from "type-graphql";
 import { Context } from "../../types";
 import isNullOrUndefined from "../../utils/isNullOrUndefined";
-import { EntitiesResult, FilterModel, MoreResultsEnum, RunQueryInfo, SortModel } from "./types";
+import { EntitiesResult, GetEntitiesInput, RunQueryInfo } from "./types";
 
 @Resolver()
 class EntitiesResolver {
   @Query(() => EntitiesResult)
   async getEntities(
-    @Arg("kind", { nullable: false }) kind: string,
-    @Arg("pageSize", { nullable: true, defaultValue: 25 }) pageSize: number,
-    @Arg("page", { nullable: true, defaultValue: 0 }) page: number,
-    @Arg("filters", () =>  [FilterModel], { nullable: true, defaultValue: [] }) filters: FilterModel[],
-    @Arg("sortModel", () => [SortModel],  { nullable: true, defaultValue: 0 }) sortModel: SortModel[],
+    @Arg("input", { nullable: false }) { kind, page, pageSize, filters, sortModel }: GetEntitiesInput,
     @Ctx() { datastore }: Context
   ): Promise<EntitiesResult> {
     let query = datastore
@@ -25,7 +21,7 @@ class EntitiesResolver {
           const { property, operator, value } = filters[i]
 
           if (value) {
-            query = query.filter(property, operator, value)
+            query = query.filter(property, operator.toString(), value)
           }
         }
       }
@@ -45,10 +41,17 @@ class EntitiesResolver {
 
     const entities = results[0]
       .filter(isNullOrUndefined)
-      .map((e) => ({
-        entity: e,
-        key: e[datastore.KEY].name || e[datastore.KEY].id,
-      }));
+      .map((e) => {
+        const key = e[datastore.KEY].name || e[datastore.KEY].id;
+
+        return {
+          entity: {
+            ...e,
+            id: key,
+          },
+          key: key,
+        }
+      });
 
     const info = results[1] as RunQueryInfo;
 

@@ -1,21 +1,13 @@
-import { useQuery, UseQueryOptions } from "react-query";
-import api from "../api";
+import { gql, QueryHookOptions, useQuery } from "@apollo/client";
 
-type UseKindsOptions =
-  | Omit<
-      UseQueryOptions<string[], unknown, string[], "kinds">,
-      "queryKey" | "queryFn"
-    >
-  | undefined;
+const GET_KINDS = gql`
+  query GetKinds {
+    getKinds
+  }
+`;
 
-async function getKinds() {
-  const result = await api.get<string[]>("/datastore/kinds");
-
-  return result.data;
-}
-
-function useKinds(options?: UseKindsOptions) {
-  return useQuery("kinds", getKinds, options);
+function useKinds(options?: QueryHookOptions<{ getKinds: string[] }>) {
+  return useQuery<{ getKinds: string[] }>(GET_KINDS, options);
 }
 
 export default useKinds;

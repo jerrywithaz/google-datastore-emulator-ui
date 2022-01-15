@@ -1,0 +1,18 @@
+overwrite: true
+schema: "http://localhost:8002/graphql"
+generates:
+  src/types/graphql.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      # - "typescript-react-apollo"
+      - add:
+            content: "import type { Operator } from '@google-cloud/datastore/build/src/query'"
+  ./src/graphql.schema.json:
+    plugins:
+      - "introspection"
+config:
+  scalars:
+    OperatorScalar: Operator
+    FilterScalar: Scalars['String'] | Scalars['Int']
+    JSONObject: Record<string, any>

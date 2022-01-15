@@ -1,14 +1,17 @@
 import express from "express";
-import cors from 'cors';
+import cors from "cors";
 import createDatastore from "./datastore";
-import http from 'http';
+import http from "http";
 import { buildSchema } from "type-graphql";
 import { ApolloServer } from "apollo-server-express";
 import KindsResolver from "./schema/kinds/resolver";
-import { ApolloServerPluginLandingPageDisabled, ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import {
+  ApolloServerPluginLandingPageDisabled,
+  ApolloServerPluginLandingPageGraphQLPlayground,
+} from "apollo-server-core";
 import NamespaceResolver from "./schema/namespaces/resolver";
 import EntitiesResolver from "./schema/entities/resolver";
-import { FilterScalar } from "./schema/entities/scalars";
+import { FilterScalar, OperatorType, OperatorScalar, FilterType } from "./schema/entities/scalars";
 
 type BoostrapOptions = {
   projectId: string;
@@ -25,8 +28,8 @@ function setEnv({ projectId, emulatorHost, port }: BoostrapOptions) {
 async function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
   setEnv({ projectId, emulatorHost, port });
 
-  console.log('PROJECT_ID', projectId);
-  console.log('DATASTORE_EMULATOR_HOST', emulatorHost);
+  console.log("PROJECT_ID", projectId);
+  console.log("DATASTORE_EMULATOR_HOST", emulatorHost);
 
   const app = express();
   const httpServer = http.createServer(app);
@@ -34,10 +37,20 @@ async function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
 
   const schema = await buildSchema({
     resolvers: [KindsResolver, NamespaceResolver, EntitiesResolver],
-    scalarsMap: [],
+    scalarsMap: [
+      {
+        type: OperatorType,
+        scalar: OperatorScalar,
+      },
+      {
+        type: FilterType,
+        scalar: FilterScalar,
+      },
+    ],
+    orphanedTypes: [],
   });
-  
-  app.enable('trust proxy');
+
+  app.enable("trust proxy");
 
   app.use(cors());
 
@@ -46,19 +59,21 @@ async function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
     context: { datastore },
     introspection: true,
     plugins: [
-        process.env.NODE_ENV === 'production'
-          ? ApolloServerPluginLandingPageDisabled()
-          : ApolloServerPluginLandingPageGraphQLPlayground(),
-      ],
+      process.env.NODE_ENV === "production"
+        ? ApolloServerPluginLandingPageDisabled()
+        : ApolloServerPluginLandingPageGraphQLPlayground(),
+    ],
   });
 
   await server.start();
 
   server.applyMiddleware({ app });
 
-  await new Promise<void>(resolve => httpServer.listen({ port }, resolve));
+  await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
 
-  console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`);
+  console.log(
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+  );
 }
 
 export default boostrap;
