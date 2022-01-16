@@ -11,7 +11,7 @@ import {
 } from "apollo-server-core";
 import NamespaceResolver from "./schema/namespaces/resolver";
 import EntitiesResolver from "./schema/entities/resolver";
-import { FilterScalar, OperatorType, OperatorScalar, FilterType } from "./schema/entities/scalars";
+import { FilterScalar, OperatorType, OperatorScalar, FilterType, PathArrayScalar, PathArrayType, DataTypeMap, DataTypeMapScalar } from "./schema/entities/scalars";
 
 type BoostrapOptions = {
   projectId: string;
@@ -46,6 +46,14 @@ async function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
         type: FilterType,
         scalar: FilterScalar,
       },
+      {
+        type: PathArrayType,
+        scalar: PathArrayScalar
+      },
+      {
+        type: DataTypeMap,
+        scalar: DataTypeMapScalar
+      }
     ],
     orphanedTypes: [],
   });

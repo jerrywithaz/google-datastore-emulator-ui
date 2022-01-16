@@ -2,7 +2,6 @@
 
 require('dotenv').config();
 
-const got = require('got');
 const path = require('path');
 const { mkdirSync } = require('fs');
 const { spawn, execSync } = require('child_process');
@@ -74,7 +73,7 @@ async function stopEmulator() {
     console.log(`Killing process with pid: ${pid}`);
     try {
       execSync(`kill -9 ${pid}`);
-    } catch (error) {}
+    } catch (error) { }
   });
 }
 
@@ -105,15 +104,16 @@ async function importEntities() {
     process.cwd(),
     `/${dir}/backups/${name}/${name}.overall_export_metadata`
   );
+  const command = `curl -d '{"input_url": "${input_url}"}' -H 'Content-Type: application/json' -X POST ${url}:import`;
 
   try {
-    await got.post(`${url}:import`, {
-      json: {
-        input_url: input_url
-      },
-      headers: {
-        'Content-Type': 'application/json'
-      }
+
+    return new Promise((resolve, reject) => {
+      const p = spawnProcess(command);
+
+      p.on('close', resolve);
+      p.on('exit', resolve);
+      p.on('reject', reject);
     });
   } catch (error) {
     console.log('Unable to import entities, failed with error: ', error);
@@ -121,14 +121,17 @@ async function importEntities() {
 }
 
 async function exportEntities() {
+  const output_url_prefix = `/${dir}/backups/${new Date().toISOString()}`;
+  const command = `curl -d '{"output_url_prefix": "${output_url_prefix}"}' -H 'Content-Type: application/json' -X POST ${url}:export`;
+
   try {
-    await got.post(`${url}:export`, {
-      json: {
-        output_url_prefix: `/${dir}/backups/${new Date().toISOString()}`
-      },
-      headers: {
-        'Content-Type': 'application/json'
-      }
+
+    return new Promise((resolve, reject) => {
+      const p = spawnProcess(command);
+
+      p.on('close', resolve);
+      p.on('exit', resolve);
+      p.on('reject', reject);
     });
   } catch (error) {
     console.log('Unable to export entities, failed with error: ', error);

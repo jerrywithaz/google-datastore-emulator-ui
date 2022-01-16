@@ -1,6 +1,6 @@
 {
   "name": "google-datastore-emulator-ui",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -22,7 +22,8 @@
     "gcloud:emulator:start": "node ./scripts/gcloud_datastore start",
     "gcloud:emulator:stop": "node ./scripts/gcloud_datastore stop",
     "gcloud:emulator:import": "node ./scripts/gcloud_datastore import",
-    "gcloud:emulator:download": "node ./scripts/gcloud_datastore download"
+    "gcloud:emulator:download": "node ./scripts/gcloud_datastore download",
+    "gcloud:emulator:export": "node ./scripts/gcloud_datastore export"
   },
   "author": "",
   "license": "ISC",
@@ -30,7 +31,7 @@
   "devDependencies": {
     "@schemastore/package": "^0.0.6",
     "@types/node": "^16.10.2",
-    "got": "^11.8.2",
+    "got": "^11.8.3",
     "nodemon": "^2.0.13",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3"

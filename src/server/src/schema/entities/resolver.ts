@@ -1,8 +1,10 @@
-import { Datastore } from "@google-cloud/datastore";
+import { Key } from "@google-cloud/datastore";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Context } from "../../types";
 import isNullOrUndefined from "../../utils/isNullOrUndefined";
 import normalizeAndSortColumns from "../../utils/normalizeAndSortColumns";
+import { DataTypeEnum, OperatorEnum } from "./enums";
+import { DataTypeMap, datatypes, operators, PathArrayType } from "./scalars";
 import {
   EntitiesResult,
   Entity,
@@ -11,22 +13,18 @@ import {
   UpdateEntityInput,
 } from "./types";
 
-function getType(datastore: Datastore, value: any, key: string) {
-  if (key.endsWith("_at") || key.endsWith("At")) return "date";
-
-  if (value === "id") return "string";
-
-  if (typeof value === "boolean") return "boolean";
-
-  if (datastore.isDouble(value) || datastore.isInt(value)) return "number";
-
-  if (Array.isArray(value)) return "array";
-
-  return typeof value;
-}
-
 @Resolver()
 class EntitiesResolver {
+  @Query(() => [DataTypeEnum])
+  async getDataTypes(): Promise<DataTypeEnum[]> {
+    return datatypes;
+  }
+
+  @Query(() => [OperatorEnum])
+  async getOperators(): Promise<OperatorEnum[]> {
+    return operators;
+  }
+
   @Query(() => EntitiesResult)
   async getEntities(
     @Arg("input", { nullable: false })
@@ -43,8 +41,8 @@ class EntitiesResolver {
       for (let i = 0; i < filters.length; i++) {
         const { property, operator, value } = filters[i];
 
-        if (value) {
-          query = query.filter(property, operator.toString(), value);
+        if (value !== undefined) {
+          query = query.filter(property, operator.toString(), value.serialize());
         }
       }
     }
@@ -63,27 +61,32 @@ class EntitiesResolver {
     const results = await datastore.runQuery(query);
 
     const entities = results[0].filter(isNullOrUndefined).map((e) => {
-      const id = e[datastore.KEY].name || e[datastore.KEY].id || e.id;
+      const key = e[datastore.KEY] as Key;
+      const id = key.id || key.name || e.id;
 
       return {
         entity: {
           id,
           ...e,
         },
-        id,
+        key: id,
+        path: new PathArrayType(...key.serialized.path)
       };
     });
 
-    const typesMap: Record<string, string> = {};
+    const typesMap = new DataTypeMap();
 
     const columns: string[] = [];
 
     entities.forEach((entity) => {
       Object.keys(entity.entity).forEach((key) => {
-        if (!typesMap[key] && entity.entity[key]) {
-          typesMap[key] = getType(datastore, entity.entity[key], key);
+        const value = entity.entity[key];
+
+        if (!typesMap.has(key)) {
           columns.push(key);
         }
+
+        typesMap.set(key, value);
       });
     });
 
@@ -91,7 +94,7 @@ class EntitiesResolver {
 
     const info = results[1] as RunQueryInfo;
 
-    return { entities, info, typesMap, columns };
+    return { entities, info, typesMap, columns, availableTypes: datatypes };
   }
 
   @Mutation(() => Entity)
@@ -100,35 +103,32 @@ class EntitiesResolver {
     @Ctx() { datastore }: Context
   ): Promise<Entity> {
     const transaction = datastore.transaction();
-    const datastore_key = datastore.key(path);
+    const key = datastore.key(path);
 
     await transaction.run();
 
-    const [entity] = await transaction.get(datastore_key);
+    const [entity] = await transaction.get(key);
 
     const updatedEntity = {
       ...entity,
       ...updates,
     };
 
+    const id = key.id || key.name || updatedEntity.id;
+
     transaction.save({
-      key: datastore_key,
+      key: key,
       data: updatedEntity,
     });
 
     await transaction.commit();
 
-    const key =
-      updatedEntity[datastore.KEY].name ||
-      updatedEntity[datastore.KEY].id ||
-      updatedEntity.id;
+    const [finalEntity] = await datastore.get(key);
 
     return {
-      entity: {
-        ...updatedEntity,
-        id: key,
-      },
-      id: key,
+      entity: finalEntity,
+      key: id,
+      path: path
     };
   }
 }

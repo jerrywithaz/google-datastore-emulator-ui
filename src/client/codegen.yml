@@ -1,5 +1,5 @@
 overwrite: true
-schema: "http://localhost:8002/graphql"
+schema: "http://localhost:8005/graphql"
 generates:
   src/types/graphql.ts:
     plugins:
@@ -15,4 +15,7 @@ config:
   scalars:
     OperatorScalar: Operator
     FilterScalar: Scalars['String'] | Scalars['Int']
+    PathArrayScalar: (Scalars['String'] | Scalars['Int'])[]
     JSONObject: Record<string, any>
+    DataTypeMapScalar: Record<string, DataTypeEnum>
+

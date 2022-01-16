@@ -40,18 +40,13 @@ async function main() {
 
     program
         .version(packageJson.version)
-        .option('-i, --id <project>', 'The id of the google datastore project.', process.env.PROJECT_ID)
-        .option('-e, --emulator-host <host>', 'The url of the emulator', process.env.DATASTORE_EMULATOR_HOST)
+        .requiredOption('-i, --id <project>', 'The id of the google datastore project.', process.env.PROJECT_ID)
+        .requiredOption('-e, --emulator-host <host>', 'The url of the emulator', process.env.DATASTORE_EMULATOR_HOST)
         .option('-p, --port <port>', 'The port to run the express server on', process.env.SERVER_PORT || '8002')
         .option('-D, --dev', 'Run in dev mode', process.env.NODE_ENV === 'development')
         .parse(process.argv);
     
     const options = program.opts();
-    
-    // Validate options
-    
-    assert(options.id, 'Missing a project, run with -i <projectId>');
-    assert(options.emulatorHost, 'Missing a emulator host, run with -e <host>');
     
     // Set consts
     

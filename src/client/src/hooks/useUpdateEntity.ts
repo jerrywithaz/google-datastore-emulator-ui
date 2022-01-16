@@ -5,7 +5,8 @@ const UPDATE_ENTITY = gql`
   mutation UpdateEntity($input: UpdateEntityInput!) {
     updateEntity(input: $input) {
         entity
-        id
+        key
+        path
     }
   }
 `;

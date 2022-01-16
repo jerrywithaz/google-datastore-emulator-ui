@@ -1,32 +1,51 @@
-import React from "react";
+import React, { useState } from "react";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Filter from "../../components/Filter";
-import { FilterModel } from "../../types/graphql";
+import { DataTypeEnum, FilterModel, Scalars } from "../../types/graphql";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 
 type EntityFiltersProps = {
-  onApplyFilters: () => void;
-  filterOptions: { label: string; value: string }[];
-  setFilters: React.Dispatch<React.SetStateAction<FilterModel[]>>;
-  filters: FilterModel[];
+  onApplyFilters: React.Dispatch<React.SetStateAction<FilterModel[]>>;
+  filterOptions: { label: string; value: string; type: string }[];
+  typesMap: Scalars['DataTypeMapScalar'];
 };
+
+type EntityFilter = FilterModel & { type: DataTypeEnum };
+
+const typesConvertor: Record<DataTypeEnum, (value: string | number) => any> = {
+  [DataTypeEnum.Date]: (value) => new Date(value),
+  [DataTypeEnum.Boolean]: (value) => Boolean(value),
+  [DataTypeEnum.String]: (value) => value,
+  [DataTypeEnum.Number]: (value) => value,
+  [DataTypeEnum.Array]: (value) => value,
+  [DataTypeEnum.Object]: (value) => value,
+  [DataTypeEnum.Undefined]: () => null,
+  [DataTypeEnum.Nullish]: () => null,
+  [DataTypeEnum.Buffer]: (value) => value,
+}
 
 const EntityFilters: React.FC<EntityFiltersProps> = ({
   onApplyFilters,
   filterOptions,
-  setFilters,
-  filters,
+  typesMap
 }) => {
+  const [filters, setFilters] = useState<EntityFilter[]>([]);
+
+  if (filterOptions.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <Box marginTop="12px">
         {filters.map((_, index) => {
           return (
             <Filter
-              key={index}
+              key={`filter-${index}`}
               options={filterOptions}
-              onChange={(option, operator, value) => {
+              typesMap={typesMap}
+              onChange={(option, operator, value, type) => {
                 setFilters((filters) => {
                   const newFilters = [...filters];
 
@@ -34,7 +53,8 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({
                     property: option,
                     operator,
                     value,
-                  } as FilterModel);
+                    type
+                  } as EntityFilter);
 
                   return newFilters;
                 });
@@ -67,7 +87,8 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({
                   property: filterOptions[0].label,
                   operator: "=",
                   value: "",
-                } as FilterModel,
+                  type: "string"
+                } as EntityFilter,
               ];
             });
           }}
@@ -79,10 +100,29 @@ const EntityFilters: React.FC<EntityFiltersProps> = ({
           variant="contained"
           style={{ marginTop: 12 }}
           onClick={() => {
-            onApplyFilters();
+            onApplyFilters(filters.map(({ property, value, operator, type }) => {
+              const convertor = typesConvertor[type];
+
+              return {
+                property,
+                value: convertor(value),
+                operator
+              }
+            }));
           }}
         >
           Apply Filters
+        </Button>
+        <Button
+          color="primary"
+          variant="contained"
+          style={{ marginTop: 12 }}
+          onClick={() => {
+            onApplyFilters([]);
+            setFilters([]);
+          }}
+        >
+          Reset Filters
         </Button>
       </ButtonGroup>
     </>

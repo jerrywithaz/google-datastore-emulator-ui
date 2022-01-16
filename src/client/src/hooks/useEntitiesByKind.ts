@@ -7,7 +7,8 @@ const GET_ENTITIES_BY_KIND = gql`
     getEntities(input: $input) {
       entities {
         entity
-        id
+        key
+        path
       }
       info {
         moreResults
