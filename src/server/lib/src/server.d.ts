@@ -3,5 +3,5 @@ declare type BoostrapOptions = {
     emulatorHost: string;
     port: number;
 };
-declare function boostrap({ projectId, emulatorHost, port }: BoostrapOptions): void;
+declare function boostrap({ projectId, emulatorHost, port }: BoostrapOptions): Promise<void>;
 export default boostrap;

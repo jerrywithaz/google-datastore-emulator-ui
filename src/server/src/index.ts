@@ -1,2 +1,2 @@
 import 'reflect-metadata';
-export { default } from './graphqlServer';
+export { default } from './server';

@@ -1,8 +1,17 @@
 import express from "express";
-import cors from 'cors';
+import cors from "cors";
 import createDatastore from "./datastore";
-import isNullOrUndefined from "./utils/isNullOrUndefined";
-import { Operator } from "@google-cloud/datastore/build/src/query";
+import http from "http";
+import { buildSchema } from "type-graphql";
+import { ApolloServer } from "apollo-server-express";
+import KindsResolver from "./schema/kinds/resolver";
+import {
+  ApolloServerPluginLandingPageDisabled,
+  ApolloServerPluginLandingPageGraphQLPlayground,
+} from "apollo-server-core";
+import NamespaceResolver from "./schema/namespaces/resolver";
+import EntitiesResolver from "./schema/entities/resolver";
+import { FilterScalar, OperatorType, OperatorScalar, FilterType } from "./schema/entities/scalars";
 
 type BoostrapOptions = {
   projectId: string;
@@ -16,105 +25,55 @@ function setEnv({ projectId, emulatorHost, port }: BoostrapOptions) {
   process.env.SERVER_PORT = port.toString();
 }
 
-function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
+async function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
   setEnv({ projectId, emulatorHost, port });
 
-  console.log('PROJECT_ID', projectId);
-  console.log('DATASTORE_EMULATOR_HOST', emulatorHost);
+  console.log("✅ PROJECT_ID", projectId);
+  console.log("✅ DATASTORE_EMULATOR_HOST", emulatorHost);
 
   const app = express();
+  const httpServer = http.createServer(app);
   const datastore = createDatastore();
 
-  app.enable('trust proxy');
+  const schema = await buildSchema({
+    resolvers: [KindsResolver, NamespaceResolver, EntitiesResolver],
+    scalarsMap: [
+      {
+        type: OperatorType,
+        scalar: OperatorScalar,
+      },
+      {
+        type: FilterType,
+        scalar: FilterScalar,
+      },
+    ],
+    orphanedTypes: [],
+  });
+
+  app.enable("trust proxy");
 
   app.use(cors());
 
-  app.get("/datastore/namespaces", async (_, res) => {
-    try {
-      const query = datastore.createQuery("__namespace__").select("__key__");
-      const results = await datastore.runQuery(query);
-      const namespaces = results[0]
-        .map((e) => e[datastore.KEY].name)
-        .filter(isNullOrUndefined);
-
-      res.contentType("application/json");
-      res.status(200);
-      res.send(namespaces);
-    } catch (error) {
-      res.status(500);
-      res.send(error);
-    }
+  const server = new ApolloServer({
+    schema,
+    context: { datastore },
+    introspection: true,
+    plugins: [
+      process.env.NODE_ENV === "production"
+        ? ApolloServerPluginLandingPageDisabled()
+        : ApolloServerPluginLandingPageGraphQLPlayground(),
+    ],
   });
 
-  app.get("/datastore/kinds", async (_, res) => {
-    try {
-      const query = datastore.createQuery("__kind__").select("__key__");
-      const results = await datastore.runQuery(query);
-      const kinds = results[0]
-        .map((e) => e[datastore.KEY].name)
-        .filter(isNullOrUndefined);
+  await server.start();
 
-      res.contentType("application/json");
-      res.status(200);
-      res.send(kinds);
-    } catch (error) {
-      res.status(500);
-      res.send(error);
-    }
-  });
+  server.applyMiddleware({ app });
 
-  app.get("/datastore/entities/:kind", async (req, res) => {
-    try {
-      const kind = req.params.kind;
-      const page = Number(req.query.page as string) || 0;
-      const pageSize = Number(req.query.pageSize as string) || 25;
-      const filters = req.query.filters;
-      const sortModel = req.query.sortModel;
-      let query = datastore.createQuery(kind).limit(pageSize).offset(page * pageSize);
+  await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
 
-      // Build filters
-      if (filters?.length && Array.isArray(filters)) {
-        for (let i = 0; i < filters.length; i++) {
-          const [property, operator, value] = JSON.parse(filters[i] as string) as [string, Operator, string | number];
-
-          if (value) {
-            query = query.filter(property, operator, value)
-          }
-        }
-      }
-
-      // Build sort model
-      if (sortModel?.length && Array.isArray(sortModel)) {
-        for (let i = 0; i < sortModel.length; i++) {
-          const {field, sort} = JSON.parse(sortModel[i] as string) as { field: string, sort: string };
-
-          query = query.order(field, {
-            descending: sort === 'desc',
-          });
-        }
-      }
-
-      const results = await datastore.runQuery(query);
-      const entities = results[0].filter(isNullOrUndefined)
-        .map((e) => ({ ...e, __key__: e[datastore.KEY].name || e[datastore.KEY].id }));
-      const info = results[1];
-
-      res.contentType("application/json");
-      res.status(200);
-      res.send({
-        info,
-        entities,
-      });
-    } catch (error) {
-      res.status(500);
-      res.send(error);
-    }
-  });
-
-  app.listen(port, () => {
-    console.log(`Listening on port: ${port}`);
-    console.log(`Server available at: http://localhost:${port}`);
-  });
+  console.log(
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+  );
 }
 
 export default boostrap;

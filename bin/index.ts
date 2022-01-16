@@ -21,7 +21,7 @@ function outputServerConfigToClient(port: number, isDev: boolean) {
         port
     };
 
-    console.log('Updating client server config at: ', configPath, config);
+    console.log('💯 Updating client server config at: ', configPath, config);
 
     fs.writeFileSync(configPath, JSON.stringify(config));
 }
