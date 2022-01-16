@@ -14,6 +14,7 @@ const GET_ENTITIES_BY_KIND = gql`
         endCursor
       }
       typesMap
+      columns
     }
   }
 `;
@@ -22,11 +23,11 @@ function useEntitiesByKind(
   input: GetEntitiesInput,
 ) {
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(2);
+  const [pageSize, setPageSize] = useState(15);
   const [rowCount, setRowCount] = useState(pageSize);
 
   const result = useLazyQuery<{ getEntities: EntitiesResult }, { input: GetEntitiesInput }>(GET_ENTITIES_BY_KIND, {
-    variables: { input: { ...input, page, pageSize } },
+    variables: { input: { ...input, page, pageSize, filters: input.filters?.filter((filter) => filter.value) } },
     onCompleted: (data) => {
       const { moreResults } = data.getEntities.info;
 

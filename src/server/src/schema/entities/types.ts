@@ -55,6 +55,9 @@ export class EntitiesResult {
   @Field(() => GraphQLJSONObject, { description: 'The data types for each key in an entity.'})
   readonly typesMap!: Record<string, any>;
 
+  @Field(() => [String])
+  columns!: string[];
+
   @Field(() => RunQueryInfo)
   info!: RunQueryInfo;
 }

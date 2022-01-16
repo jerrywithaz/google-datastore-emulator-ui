@@ -21,6 +21,7 @@ export type Scalars = {
 
 export type EntitiesResult = {
   __typename?: 'EntitiesResult';
+  columns: Array<Scalars['String']>;
   entities: Array<Entity>;
   info: RunQueryInfo;
   /** The data types for each key in an entity. */

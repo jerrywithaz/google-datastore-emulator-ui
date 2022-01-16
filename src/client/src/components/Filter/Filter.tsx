@@ -3,6 +3,7 @@ import TextField from "@material-ui/core/TextField";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { useEffect, useState } from "react";
 
 type LabelValue = {
@@ -19,6 +20,7 @@ type FilterProps = {
     operator: string,
     value: string | number | null
   ) => void;
+  onRemove: () => void;
 };
 
 const operators: LabelValue[] = [
@@ -38,6 +40,7 @@ const Filter: React.FC<FilterProps> = ({
   defaultValue = "",
   defaultOption = null,
   onChange,
+  onRemove
 }) => {
   const [option, setOption] = useState<string | number | null>(defaultOption);
   const [operator, setOperator] = useState<string>("=");
@@ -81,14 +84,22 @@ const Filter: React.FC<FilterProps> = ({
         style={style}
         variant="outlined"
       />
-      <Button
-        variant="outlined"
-        onClick={() => {
-          setValue("");
-        }}
-      >
-        Clear
-      </Button>
+      <ButtonGroup>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            setValue("");
+          }}
+        >
+          Clear
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={onRemove}
+        >
+          Remove
+        </Button>
+      </ButtonGroup>
     </Box>
   );
 };

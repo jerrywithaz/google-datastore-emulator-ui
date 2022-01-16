@@ -71,7 +71,7 @@ const Entities: React.FC = () => {
   }, [entities]);
 
   const dataGridColumns = useMemo<GridColDef[]>(() => {
-    const columns: GridColDef[] = columnHeaders.map(({ key }) => {
+    const columns: GridColDef[] = (entitiesData?.columns || []).map((key) => {
       const type = entitiesData?.typesMap[key];
       const isArrayOrObject = type === "array" || type === "object";
 
@@ -129,7 +129,7 @@ const Entities: React.FC = () => {
       width: 100,
     };
     return [viewColumn].concat(columns);
-  }, [columnHeaders, entitiesData?.typesMap]);
+  }, [entitiesData?.columns, entitiesData?.typesMap]);
 
   const filterOptions = useMemo(() => {
     return columnHeaders.map(({ key }) => ({
@@ -150,6 +150,7 @@ const Entities: React.FC = () => {
         onApplyFilters={fetchEntities}
         filterOptions={filterOptions}
         setFilters={setFilters}
+        filters={filters}
       />
       <Box height={600} width="100%" marginTop="20px">
         <DataGrid
@@ -191,6 +192,7 @@ const Entities: React.FC = () => {
           getRowId={(rowData) => {
             return rowData.__key__ ?? rowData.id;
           }}
+          disableSelectionOnClick
           rowHeight={40}
           onPageSizeChange={setPageSize}
           componentsProps={{

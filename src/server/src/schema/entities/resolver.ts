@@ -2,6 +2,7 @@ import { Datastore } from "@google-cloud/datastore";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Context } from "../../types";
 import isNullOrUndefined from "../../utils/isNullOrUndefined";
+import normalizeAndSortColumns from "../../utils/normalizeAndSortColumns";
 import {
   EntitiesResult,
   Entity,
@@ -11,16 +12,15 @@ import {
 } from "./types";
 
 function getType(datastore: Datastore, value: any, key: string) {
+  if (key.endsWith("_at") || key.endsWith("At")) return "date";
 
-  if (key.endsWith('_at') || key.endsWith('At')) return 'date';
+  if (value === "id") return "string";
 
-  if (value === 'id') return 'string';
+  if (typeof value === "boolean") return "boolean";
 
-  if (typeof value === 'boolean') return 'boolean';
+  if (datastore.isDouble(value) || datastore.isInt(value)) return "number";
 
-  if (datastore.isDouble(value) || datastore.isInt(value)) return 'number';
-
-  if (Array.isArray(value)) return 'array';
+  if (Array.isArray(value)) return "array";
 
   return typeof value;
 }
@@ -67,6 +67,7 @@ class EntitiesResolver {
 
       return {
         entity: {
+          id,
           ...e,
         },
         id,
@@ -75,17 +76,22 @@ class EntitiesResolver {
 
     const typesMap: Record<string, string> = {};
 
+    const columns: string[] = [];
+
     entities.forEach((entity) => {
       Object.keys(entity.entity).forEach((key) => {
         if (!typesMap[key] && entity.entity[key]) {
           typesMap[key] = getType(datastore, entity.entity[key], key);
+          columns.push(key);
         }
       });
     });
 
+    normalizeAndSortColumns(columns);
+
     const info = results[1] as RunQueryInfo;
 
-    return { entities, info, typesMap };
+    return { entities, info, typesMap, columns };
   }
 
   @Mutation(() => Entity)
