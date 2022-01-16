@@ -1,4 +1,4 @@
-import { Field, Float, InputType, Int, ObjectType, registerEnumType } from "type-graphql";
+import { Field, Float, ID, InputType, Int, ObjectType, registerEnumType } from "type-graphql";
 import { GraphQLJSONObject } from "graphql-type-json";
 import { FilterScalar, OperatorType, OperatorScalar, FilterType } from "./scalars";
 
@@ -31,7 +31,7 @@ registerEnumType(MoreResultsEnum, {
 
 @ObjectType()
 export class RunQueryInfo {
-  @Field({ nullable: true }) // and explicitly use it
+  @Field({ nullable: true })
   endCursor?: string;
 
   @Field(() => MoreResultsEnum, { nullable: true })
@@ -40,17 +40,20 @@ export class RunQueryInfo {
 
 @ObjectType()
 export class Entity {
-  @Field(() => GraphQLJSONObject) // and explicitly use it
+  @Field(() => GraphQLJSONObject)
   readonly entity!: Record<string, any>;
 
-  @Field()
-  key!: string;
+  @Field(() => ID)
+  readonly id!: string;
 }
 
 @ObjectType()
 export class EntitiesResult {
-  @Field(() => [Entity]) // and explicitly use it
+  @Field(() => [Entity])
   entities!: Entity[];
+
+  @Field(() => GraphQLJSONObject, { description: 'The data types for each key in an entity.'})
+  readonly typesMap!: Record<string, any>;
 
   @Field(() => RunQueryInfo)
   info!: RunQueryInfo;
@@ -95,3 +98,12 @@ export class GetEntitiesInput {
   sortModel!: SortModel[];
 }
 
+
+@InputType()
+export class UpdateEntityInput {
+  @Field(() => [String])
+  path!: string[];
+
+  @Field(() => GraphQLJSONObject)
+  readonly updates!: Record<string, any>;
+}

@@ -23,12 +23,14 @@ export type EntitiesResult = {
   __typename?: 'EntitiesResult';
   entities: Array<Entity>;
   info: RunQueryInfo;
+  /** The data types for each key in an entity. */
+  typesMap: Scalars['JSONObject'];
 };
 
 export type Entity = {
   __typename?: 'Entity';
   entity: Scalars['JSONObject'];
-  key: Scalars['String'];
+  id: Scalars['ID'];
 };
 
 export type FilterModel = {
@@ -54,6 +56,16 @@ export enum MoreResultsEnum {
   NoMoreResults = 'NO_MORE_RESULTS'
 }
 
+export type Mutation = {
+  __typename?: 'Mutation';
+  updateEntity: Entity;
+};
+
+
+export type MutationUpdateEntityArgs = {
+  input: UpdateEntityInput;
+};
+
 export type Query = {
   __typename?: 'Query';
   getEntities: EntitiesResult;
@@ -75,4 +87,9 @@ export type RunQueryInfo = {
 export type SortModel = {
   field: Scalars['String'];
   sort: Scalars['String'];
+};
+
+export type UpdateEntityInput = {
+  path: Array<Scalars['String']>;
+  updates: Scalars['JSONObject'];
 };

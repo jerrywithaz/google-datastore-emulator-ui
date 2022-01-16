@@ -7,12 +7,13 @@ const GET_ENTITIES_BY_KIND = gql`
     getEntities(input: $input) {
       entities {
         entity
-        key
+        id
       }
       info {
         moreResults
         endCursor
       }
+      typesMap
     }
   }
 `;
@@ -21,7 +22,7 @@ function useEntitiesByKind(
   input: GetEntitiesInput,
 ) {
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(2);
   const [rowCount, setRowCount] = useState(pageSize);
 
   const result = useLazyQuery<{ getEntities: EntitiesResult }, { input: GetEntitiesInput }>(GET_ENTITIES_BY_KIND, {
