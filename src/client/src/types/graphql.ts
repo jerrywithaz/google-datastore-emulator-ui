@@ -11,12 +11,23 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
+  DateTime: any;
   /** Google datastore query filter scalar type */
   FilterScalar: Scalars['String'] | Scalars['Int'];
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSONObject: Record<string, any>;
   /** Google datastore operator value scalar type */
   OperatorScalar: Operator;
+};
+
+export type DatastoreBackup = {
+  __typename?: 'DatastoreBackup';
+  date: Scalars['DateTime'];
+  exists: Scalars['Boolean'];
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  path?: Maybe<Scalars['String']>;
 };
 
 export type EntitiesResult = {
@@ -69,6 +80,7 @@ export type MutationUpdateEntityArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  getBackups: Array<DatastoreBackup>;
   getEntities: EntitiesResult;
   getKinds: Array<Scalars['String']>;
   getNamespaces: Array<Scalars['String']>;

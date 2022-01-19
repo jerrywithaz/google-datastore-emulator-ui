@@ -12,6 +12,7 @@ import {
 import NamespaceResolver from "./schema/namespaces/resolver";
 import EntitiesResolver from "./schema/entities/resolver";
 import { FilterScalar, OperatorType, OperatorScalar, FilterType } from "./schema/entities/scalars";
+import GsUtilResolver from "./schema/gsutil/resolver";
 
 type BoostrapOptions = {
   projectId: string;
@@ -36,7 +37,7 @@ async function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
   const datastore = createDatastore();
 
   const schema = await buildSchema({
-    resolvers: [KindsResolver, NamespaceResolver, EntitiesResolver],
+    resolvers: [KindsResolver, NamespaceResolver, EntitiesResolver, GsUtilResolver],
     scalarsMap: [
       {
         type: OperatorType,

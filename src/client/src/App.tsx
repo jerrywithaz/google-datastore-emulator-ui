@@ -16,6 +16,7 @@ import {
 import AppContent from "./components/AppContent";
 import AppHeader from "./components/AppHeader";
 import AppDrawer from "./components/AppDrawer";
+import DownloadBackup from "./pages/DownloadBackup";
 
 SyntaxHighlighter.registerLanguage("json", json);
 
@@ -73,6 +74,7 @@ const App: React.FC = () => {
               <AppContent drawerOpen={drawerOpen} drawerWidth={drawerWidth}>
                 <Switch>
                   <Route path="/" exact component={Entities} />
+                  <Route path="/download-backup" exact component={DownloadBackup} />
                 </Switch>
               </AppContent>
             </ApolloProvider>
