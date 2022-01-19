@@ -37,6 +37,14 @@ async function boostrap({ projectId, emulatorHost, port }) {
                 type: scalars_1.FilterType,
                 scalar: scalars_1.FilterScalar,
             },
+            {
+                type: scalars_1.PathArrayType,
+                scalar: scalars_1.PathArrayScalar
+            },
+            {
+                type: scalars_1.DataTypeMap,
+                scalar: scalars_1.DataTypeMapScalar
+            }
         ],
         orphanedTypes: [],
     });

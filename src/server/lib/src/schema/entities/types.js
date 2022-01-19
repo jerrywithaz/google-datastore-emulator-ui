@@ -9,35 +9,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateEntityInput = exports.GetEntitiesInput = exports.SortModel = exports.FilterModel = exports.EntitiesResult = exports.Entity = exports.RunQueryInfo = exports.MoreResultsEnum = exports.OperatorEnum = void 0;
+exports.UpdateEntityInput = exports.GetEntitiesInput = exports.SortModel = exports.FilterModel = exports.EntitiesResult = exports.Entity = exports.RunQueryInfo = void 0;
 const type_graphql_1 = require("type-graphql");
 const graphql_type_json_1 = require("graphql-type-json");
 const scalars_1 = require("./scalars");
-var OperatorEnum;
-(function (OperatorEnum) {
-    OperatorEnum["="] = "=";
-    OperatorEnum["<"] = "<";
-    OperatorEnum[">"] = ">";
-    OperatorEnum["<="] = "<=";
-    OperatorEnum[">="] = ">=";
-    OperatorEnum["HAS_ANCESTOR"] = "HAS_ANCESTOR";
-})(OperatorEnum = exports.OperatorEnum || (exports.OperatorEnum = {}));
-var MoreResultsEnum;
-(function (MoreResultsEnum) {
-    MoreResultsEnum["MORE_RESULTS_TYPE_UNSPECIFIED"] = "MORE_RESULTS_TYPE_UNSPECIFIED";
-    MoreResultsEnum["NOT_FINISHED"] = "NOT_FINISHED";
-    MoreResultsEnum["MORE_RESULTS_AFTER_LIMIT"] = "MORE_RESULTS_AFTER_LIMIT";
-    MoreResultsEnum["MORE_RESULTS_AFTER_CURSOR"] = "MORE_RESULTS_AFTER_CURSOR";
-    MoreResultsEnum["NO_MORE_RESULTS"] = "NO_MORE_RESULTS";
-})(MoreResultsEnum = exports.MoreResultsEnum || (exports.MoreResultsEnum = {}));
-(0, type_graphql_1.registerEnumType)(OperatorEnum, {
-    name: "OperatorEnum",
-    description: "The supported operators by google datastore", // this one is optional
-});
-(0, type_graphql_1.registerEnumType)(MoreResultsEnum, {
-    name: "MoreResultsEnum",
-    description: "The list of more results values from google datastore", // this one is optional
-});
+const enums_1 = require("./enums");
 let RunQueryInfo = class RunQueryInfo {
 };
 __decorate([
@@ -45,7 +21,7 @@ __decorate([
     __metadata("design:type", String)
 ], RunQueryInfo.prototype, "endCursor", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => MoreResultsEnum, { nullable: true }),
+    (0, type_graphql_1.Field)(() => enums_1.MoreResultsEnum, { nullable: true }),
     __metadata("design:type", String)
 ], RunQueryInfo.prototype, "moreResults", void 0);
 RunQueryInfo = __decorate([
@@ -61,7 +37,11 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Field)(() => type_graphql_1.ID),
     __metadata("design:type", String)
-], Entity.prototype, "id", void 0);
+], Entity.prototype, "key", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => scalars_1.PathArrayScalar),
+    __metadata("design:type", scalars_1.PathArrayType)
+], Entity.prototype, "path", void 0);
 Entity = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], Entity);
@@ -73,8 +53,8 @@ __decorate([
     __metadata("design:type", Array)
 ], EntitiesResult.prototype, "entities", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => graphql_type_json_1.GraphQLJSONObject, { description: 'The data types for each key in an entity.' }),
-    __metadata("design:type", Object)
+    (0, type_graphql_1.Field)(() => scalars_1.DataTypeMapScalar, { description: 'The data types for each key in an entity.' }),
+    __metadata("design:type", scalars_1.DataTypeMap)
 ], EntitiesResult.prototype, "typesMap", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => [String]),
@@ -84,6 +64,10 @@ __decorate([
     (0, type_graphql_1.Field)(() => RunQueryInfo),
     __metadata("design:type", RunQueryInfo)
 ], EntitiesResult.prototype, "info", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => [enums_1.DataTypeEnum]),
+    __metadata("design:type", Array)
+], EntitiesResult.prototype, "availableTypes", void 0);
 EntitiesResult = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], EntitiesResult);
@@ -149,8 +133,8 @@ exports.GetEntitiesInput = GetEntitiesInput;
 let UpdateEntityInput = class UpdateEntityInput {
 };
 __decorate([
-    (0, type_graphql_1.Field)(() => [String]),
-    __metadata("design:type", Array)
+    (0, type_graphql_1.Field)(() => scalars_1.PathArrayScalar),
+    __metadata("design:type", scalars_1.PathArrayType)
 ], UpdateEntityInput.prototype, "path", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => graphql_type_json_1.GraphQLJSONObject),

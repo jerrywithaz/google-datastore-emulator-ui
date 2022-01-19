@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import useKinds from "../../hooks/useKinds";
 import useEntitiesByKind from "../../hooks/useEntitiesByKind";
-import getColumnHeaders from "../../utils/getColumnHeaders";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridCellEditCommitParams, GridCellParams, GridColDef } from "@mui/x-data-grid";
 import { LabelDisplayedRowsArgs } from "@material-ui/core";
 import { FilterModel, SortModel } from "../../types/graphql";
 import useUpdateEntity from "../../hooks/useUpdateEntity";
@@ -30,6 +29,7 @@ const Entities: React.FC = () => {
   const [entity, setEntity] = useState<Record<string, any> | null>(null);
   const [filters, setFilters] = useState<FilterModel[]>([]);
   const [sortModel, setSortModel] = useState<SortModel[] | null>(null);
+  const [currentCell, setCurrentCell] = useState<GridCellParams | null>(null);
 
   const { data: kindsData, loading: isLoadingKinds } = useKinds({
     onCompleted: (data) => {
@@ -59,16 +59,13 @@ const Entities: React.FC = () => {
 
   const entities = useMemo(() => {
     if (entitiesData?.entities) {
-      return entitiesData?.entities.map(({ entity, id }) => {
-        return { ...entity, id };
+      return entitiesData?.entities.map(({ entity, key, path }) => {
+        return { id: key, key, ...entity, __path: path };
       });
     }
     return [];
   }, [entitiesData?.entities]);
 
-  const columnHeaders = useMemo(() => {
-    return getColumnHeaders(entities);
-  }, [entities]);
 
   const dataGridColumns = useMemo<GridColDef[]>(() => {
     const columns: GridColDef[] = (entitiesData?.columns || []).map((key) => {
@@ -81,7 +78,7 @@ const Entities: React.FC = () => {
         flex: 1,
         valueFormatter: (params) => {
           if (params.value instanceof Date) {
-            return params.value.getTime();
+            return params.value.toLocaleString();
           }
 
           if (params.value === undefined) return "-";
@@ -129,14 +126,49 @@ const Entities: React.FC = () => {
       width: 100,
     };
     return [viewColumn].concat(columns);
-  }, [entitiesData?.columns, entitiesData?.typesMap]);
+  }, [entitiesData]);
 
   const filterOptions = useMemo(() => {
-    return columnHeaders.map(({ key }) => ({
-      label: key,
-      value: key,
-    }));
-  }, [columnHeaders]);
+    if (entitiesData) {
+      return entitiesData.columns.map((key) => ({
+        label: key,
+        value: key,
+        type: entitiesData.typesMap[key]
+      }));
+    }
+    return [];
+  }, [entitiesData]);
+
+  const onCellEditCommit = useCallback(async (data: GridCellEditCommitParams) => {
+    if (currentCell) {
+      const { value, field } = data;
+      const type = entitiesData?.typesMap[field];
+      const isArrayOrObject = type === "array" || type === "object";
+
+      try {
+        const updates = {
+          [field]: isArrayOrObject
+            ? JSON.parse(value as any)
+            : value instanceof Date
+              ? value
+              : value,
+        };
+
+        const path = currentCell.row.__path;
+  
+        await updateEntity({
+          variables: {
+            input: {
+              path,
+              updates,
+            },
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }, [currentCell, entitiesData?.typesMap, updateEntity]);
 
   useEffect(() => {
     if (kind) fetchEntities();
@@ -147,10 +179,9 @@ const Entities: React.FC = () => {
     <Box>
       <EntityKinds kind={kind} kinds={kinds} setKind={setKind} />
       <EntityFilters
-        onApplyFilters={fetchEntities}
+        onApplyFilters={setFilters}
         filterOptions={filterOptions}
-        setFilters={setFilters}
-        filters={filters}
+        typesMap={entitiesData?.typesMap ?? {}}
       />
       <Box height={600} width="100%" marginTop="20px">
         <DataGrid
@@ -163,26 +194,11 @@ const Entities: React.FC = () => {
           pageSize={pageSize}
           page={page}
           editMode="cell"
-          onCellEditCommit={({ field, id, value }, r, k) => {
-            const type = entitiesData?.typesMap[field];
-            const isArrayOrObject = type === "array" || type === "object";
-
-            updateEntity({
-              variables: {
-                input: {
-                  path: [kind, `${id}`],
-                  updates: {
-                    [field]: isArrayOrObject
-                      ? JSON.parse(value as any)
-                      : value instanceof Date
-                      ? value.getTime()
-                      : value,
-                  },
-                },
-              },
-            });
+          onCellEditStart={(params) => {
+            setCurrentCell(params);
           }}
-          rowsPerPageOptions={[5, 10, 25, 50, 100]}
+          onCellEditCommit={onCellEditCommit}
+          rowsPerPageOptions={[5, 10, 15, 25, 50, 100]}
           checkboxSelection={false}
           loading={isLoadingEntities || isLoadingKinds}
           onPageChange={(page) => {
@@ -190,7 +206,7 @@ const Entities: React.FC = () => {
             fetchEntities();
           }}
           getRowId={(rowData) => {
-            return rowData.__key__ ?? rowData.id;
+            return rowData.id;
           }}
           disableSelectionOnClick
           rowHeight={40}

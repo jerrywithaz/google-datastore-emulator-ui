@@ -18,21 +18,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const type_graphql_1 = require("type-graphql");
 const isNullOrUndefined_1 = __importDefault(require("../../utils/isNullOrUndefined"));
 const normalizeAndSortColumns_1 = __importDefault(require("../../utils/normalizeAndSortColumns"));
+const enums_1 = require("./enums");
+const scalars_1 = require("./scalars");
 const types_1 = require("./types");
-function getType(datastore, value, key) {
-    if (key.endsWith("_at") || key.endsWith("At"))
-        return "date";
-    if (value === "id")
-        return "string";
-    if (typeof value === "boolean")
-        return "boolean";
-    if (datastore.isDouble(value) || datastore.isInt(value))
-        return "number";
-    if (Array.isArray(value))
-        return "array";
-    return typeof value;
-}
 let EntitiesResolver = class EntitiesResolver {
+    async getDataTypes() {
+        return scalars_1.datatypes;
+    }
+    async getOperators() {
+        return scalars_1.operators;
+    }
     async getEntities({ kind, page, pageSize, filters, sortModel }, { datastore }) {
         let query = datastore
             .createQuery(kind)
@@ -42,8 +37,8 @@ let EntitiesResolver = class EntitiesResolver {
         if ((filters === null || filters === void 0 ? void 0 : filters.length) && Array.isArray(filters)) {
             for (let i = 0; i < filters.length; i++) {
                 const { property, operator, value } = filters[i];
-                if (value) {
-                    query = query.filter(property, operator.toString(), value);
+                if (value !== undefined) {
+                    query = query.filter(property, operator.toString(), value.serialize());
                 }
             }
         }
@@ -58,55 +53,67 @@ let EntitiesResolver = class EntitiesResolver {
         }
         const results = await datastore.runQuery(query);
         const entities = results[0].filter(isNullOrUndefined_1.default).map((e) => {
-            const id = e[datastore.KEY].name || e[datastore.KEY].id || e.id;
+            const key = e[datastore.KEY];
+            const id = key.id || key.name || e.id;
             return {
                 entity: {
                     id,
                     ...e,
                 },
-                id,
+                key: id,
+                path: new scalars_1.PathArrayType(...key.serialized.path)
             };
         });
-        const typesMap = {};
+        const typesMap = new scalars_1.DataTypeMap();
         const columns = [];
         entities.forEach((entity) => {
             Object.keys(entity.entity).forEach((key) => {
-                if (!typesMap[key] && entity.entity[key]) {
-                    typesMap[key] = getType(datastore, entity.entity[key], key);
+                const value = entity.entity[key];
+                if (!typesMap.has(key)) {
                     columns.push(key);
                 }
+                typesMap.set(key, value);
             });
         });
         (0, normalizeAndSortColumns_1.default)(columns);
         const info = results[1];
-        return { entities, info, typesMap, columns };
+        return { entities, info, typesMap, columns, availableTypes: scalars_1.datatypes };
     }
     async updateEntity({ path, updates }, { datastore }) {
         const transaction = datastore.transaction();
-        const datastore_key = datastore.key(path);
+        const key = datastore.key(path);
         await transaction.run();
-        const [entity] = await transaction.get(datastore_key);
+        const [entity] = await transaction.get(key);
         const updatedEntity = {
             ...entity,
             ...updates,
         };
+        const id = key.id || key.name || updatedEntity.id;
         transaction.save({
-            key: datastore_key,
+            key: key,
             data: updatedEntity,
         });
         await transaction.commit();
-        const key = updatedEntity[datastore.KEY].name ||
-            updatedEntity[datastore.KEY].id ||
-            updatedEntity.id;
+        const [finalEntity] = await datastore.get(key);
         return {
-            entity: {
-                ...updatedEntity,
-                id: key,
-            },
-            id: key,
+            entity: finalEntity,
+            key: id,
+            path: path
         };
     }
 };
+__decorate([
+    (0, type_graphql_1.Query)(() => [enums_1.DataTypeEnum]),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EntitiesResolver.prototype, "getDataTypes", null);
+__decorate([
+    (0, type_graphql_1.Query)(() => [enums_1.OperatorEnum]),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EntitiesResolver.prototype, "getOperators", null);
 __decorate([
     (0, type_graphql_1.Query)(() => types_1.EntitiesResult),
     __param(0, (0, type_graphql_1.Arg)("input", { nullable: false })),

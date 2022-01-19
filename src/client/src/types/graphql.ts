@@ -11,6 +11,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /** Google datastore data type scalar type */
+  DataTypeMapScalar: Record<string, DataTypeEnum>;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any;
   /** Google datastore query filter scalar type */
@@ -19,7 +21,22 @@ export type Scalars = {
   JSONObject: Record<string, any>;
   /** Google datastore operator value scalar type */
   OperatorScalar: Operator;
+  /** Google datastore key path scalar type */
+  PathArrayScalar: (Scalars['String'] | Scalars['Int'])[];
 };
+
+/** The list of available datatypes returned from the google datastore */
+export enum DataTypeEnum {
+  Array = 'array',
+  Boolean = 'boolean',
+  Buffer = 'buffer',
+  Date = 'date',
+  Nullish = 'nullish',
+  Number = 'number',
+  Object = 'object',
+  String = 'string',
+  Undefined = 'undefined'
+}
 
 export type DatastoreBackup = {
   __typename?: 'DatastoreBackup';
@@ -32,17 +49,19 @@ export type DatastoreBackup = {
 
 export type EntitiesResult = {
   __typename?: 'EntitiesResult';
+  availableTypes: Array<DataTypeEnum>;
   columns: Array<Scalars['String']>;
   entities: Array<Entity>;
   info: RunQueryInfo;
   /** The data types for each key in an entity. */
-  typesMap: Scalars['JSONObject'];
+  typesMap: Scalars['DataTypeMapScalar'];
 };
 
 export type Entity = {
   __typename?: 'Entity';
   entity: Scalars['JSONObject'];
-  id: Scalars['ID'];
+  key: Scalars['ID'];
+  path: Scalars['PathArrayScalar'];
 };
 
 export type FilterModel = {
@@ -78,12 +97,24 @@ export type MutationUpdateEntityArgs = {
   input: UpdateEntityInput;
 };
 
+/** The supported operators by google datastore */
+export enum OperatorEnum {
+  Equals = 'equals',
+  GreaterThan = 'greater_than',
+  GreaterThanOrEqual = 'greater_than_or_equal',
+  HasAncestor = 'has_ancestor',
+  LessThan = 'less_than',
+  LessThanOrEqual = 'less_than_or_equal'
+}
+
 export type Query = {
   __typename?: 'Query';
   getBackups: Array<DatastoreBackup>;
+  getDataTypes: Array<DataTypeEnum>;
   getEntities: EntitiesResult;
   getKinds: Array<Scalars['String']>;
   getNamespaces: Array<Scalars['String']>;
+  getOperators: Array<OperatorEnum>;
 };
 
 
@@ -103,6 +134,6 @@ export type SortModel = {
 };
 
 export type UpdateEntityInput = {
-  path: Array<Scalars['String']>;
+  path: Scalars['PathArrayScalar'];
   updates: Scalars['JSONObject'];
 };

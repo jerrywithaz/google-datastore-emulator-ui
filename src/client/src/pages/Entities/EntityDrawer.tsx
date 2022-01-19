@@ -6,8 +6,8 @@ import Drawer from "@material-ui/core/Drawer";
 import Typography from "@material-ui/core/Typography";
 import { isObject } from "../../utils/is";
 
-function removeKey(key: string) {
-  return key !== "__key__";
+function removeKeyAndPath(key: string) {
+  return key !== "__key__" && key !== "__path";
 }
 
 type EntityDrawerProps = {
@@ -16,6 +16,7 @@ type EntityDrawerProps = {
     setDrawerOpen: (value: boolean) => void
     setEntity: (value: Record<string , any> | null) => void
 }
+
 const EntityDrawer: React.FC<EntityDrawerProps> = ({ drawerOpen, entity, setDrawerOpen, setEntity }) => {
   return (
     <Drawer
@@ -35,7 +36,7 @@ const EntityDrawer: React.FC<EntityDrawerProps> = ({ drawerOpen, entity, setDraw
         {entity &&
           Object.keys(entity)
             .sort()
-            .filter(removeKey)
+            .filter(removeKeyAndPath)
             .map((key) => {
               return (
                 <Box key={key} padding="5px 0px">

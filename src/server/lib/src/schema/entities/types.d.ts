@@ -1,32 +1,20 @@
-import { OperatorType, FilterType } from "./scalars";
-export declare enum OperatorEnum {
-    "=" = "=",
-    "<" = "<",
-    ">" = ">",
-    "<=" = "<=",
-    ">=" = ">=",
-    "HAS_ANCESTOR" = "HAS_ANCESTOR"
-}
-export declare enum MoreResultsEnum {
-    "MORE_RESULTS_TYPE_UNSPECIFIED" = "MORE_RESULTS_TYPE_UNSPECIFIED",
-    "NOT_FINISHED" = "NOT_FINISHED",
-    "MORE_RESULTS_AFTER_LIMIT" = "MORE_RESULTS_AFTER_LIMIT",
-    "MORE_RESULTS_AFTER_CURSOR" = "MORE_RESULTS_AFTER_CURSOR",
-    "NO_MORE_RESULTS" = "NO_MORE_RESULTS"
-}
+import { OperatorType, FilterType, PathArrayType, DataTypeMap } from "./scalars";
+import { DataTypeEnum, MoreResultsEnum } from "./enums";
 export declare class RunQueryInfo {
     endCursor?: string;
     moreResults?: MoreResultsEnum;
 }
 export declare class Entity {
     readonly entity: Record<string, any>;
-    readonly id: string;
+    readonly key: string;
+    readonly path: PathArrayType;
 }
 export declare class EntitiesResult {
     entities: Entity[];
-    readonly typesMap: Record<string, any>;
+    readonly typesMap: DataTypeMap;
     columns: string[];
     info: RunQueryInfo;
+    availableTypes: DataTypeEnum[];
 }
 export declare class FilterModel {
     property: string;
@@ -45,6 +33,6 @@ export declare class GetEntitiesInput {
     sortModel: SortModel[];
 }
 export declare class UpdateEntityInput {
-    path: string[];
+    readonly path: PathArrayType;
     readonly updates: Record<string, any>;
 }

@@ -15,4 +15,7 @@ config:
   scalars:
     OperatorScalar: Operator
     FilterScalar: Scalars['String'] | Scalars['Int']
+    PathArrayScalar: (Scalars['String'] | Scalars['Int'])[]
     JSONObject: Record<string, any>
+    DataTypeMapScalar: Record<string, DataTypeEnum>
+
