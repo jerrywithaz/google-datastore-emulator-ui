@@ -29,18 +29,6 @@ function setEnv({ projectId, emulatorHost, port, backupBucket, backupDir }: Boos
   process.env.SERVER_PORT = port.toString();
   process.env.DATASTORE_BACKUP_BUCKET = backupBucket;
   process.env.DATASTORE_BACKUP_DIR = backupDir;
-
-  const env = ["PROJECT_ID", "DATASTORE_EMULATOR_HOST", "SERVER_PORT", "DATASTORE_BACKUP_BUCKET", "DATASTORE_BACKUP_DIR"]
-
-  for (const key of env) {
-    const element = process.env[key];
-  
-    if (element) {
-      console.log("✅", key, element);
-    } else {
-      console.log("❌", key, element);
-    }
-  }
 }
 
 async function boostrap({ projectId, emulatorHost, port, backupBucket, backupDir }: BoostrapOptions) {

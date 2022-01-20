@@ -13,7 +13,7 @@ function ValidateEnv(vars: string | string[]) {
     const varsToCheck = Array.isArray(vars) ? vars : [vars];
 
     for (const varToCheck of varsToCheck) {
-      if (process.env[varToCheck]) {
+      if (!process.env[varToCheck]) {
         throw new Error(
           `The envionment variable ${varToCheck} is not set. ${hints[varToCheck]}`
         );

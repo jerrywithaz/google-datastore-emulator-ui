@@ -10,7 +10,7 @@ function ValidateEnv(vars) {
     return (0, type_graphql_1.createMethodDecorator)(async (_, next) => {
         const varsToCheck = Array.isArray(vars) ? vars : [vars];
         for (const varToCheck of varsToCheck) {
-            if (process.env[varToCheck]) {
+            if (!process.env[varToCheck]) {
                 throw new Error(`The envionment variable ${varToCheck} is not set. ${hints[varToCheck]}`);
             }
         }
