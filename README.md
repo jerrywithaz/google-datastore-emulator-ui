@@ -32,7 +32,7 @@ yarn global add google-datastore-emulator-ui
 Run 
 
 ```sh
-google-datastore-emulator-ui -i my-project-id -e http://localhost:8097
+google-datastore-emulator-ui -i my-project-id -e http://localhost:8097 -b my-backups-bucket -d /Users/zhogan/Documents/Code/Personal/google-datastore-emulator-ui/gcloud_datastore/backups
 ```
 
 ## Cli Options
