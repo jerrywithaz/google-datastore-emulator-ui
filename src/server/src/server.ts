@@ -17,17 +17,21 @@ import GsUtilResolver from "./schema/gsutil/resolver";
 type BoostrapOptions = {
   projectId: string;
   emulatorHost: string;
+  backupBucket: string;
+  backupDir: string;
   port: number;
 };
 
-function setEnv({ projectId, emulatorHost, port }: BoostrapOptions) {
+function setEnv({ projectId, emulatorHost, port, backupBucket, backupDir }: BoostrapOptions) {
   process.env.PROJECT_ID = projectId;
   process.env.DATASTORE_EMULATOR_HOST = emulatorHost;
   process.env.SERVER_PORT = port.toString();
+  process.env.DATASTORE_BACKUP_BUCKET = backupBucket;
+  process.env.DATASTORE_BACKUP_DIR = backupDir;
 }
 
-async function boostrap({ projectId, emulatorHost, port }: BoostrapOptions) {
-  setEnv({ projectId, emulatorHost, port });
+async function boostrap({ projectId, emulatorHost, port, backupBucket, backupDir }: BoostrapOptions) {
+  setEnv({ projectId, emulatorHost, port, backupBucket, backupDir });
 
   const app = express();
   const httpServer = http.createServer(app);
