@@ -41,40 +41,39 @@ const types_1 = require("./types");
 const removeTrailingSlash_1 = __importDefault(require("../../utils/removeTrailingSlash"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
-const env_1 = __importDefault(require("../../env"));
 const ValidateEmulatorRunning_1 = __importDefault(require("../../decorators/ValidateEmulatorRunning"));
 const ValidateEnv_1 = __importDefault(require("../../decorators/ValidateEnv"));
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
-function getBackupName(backup) {
+function getBackupName(backup, bucket) {
     return backup
-        .replace(`gs://${env_1.default.DATASTORE_BACKUP_BUCKET}`, "")
+        .replace(`gs://${bucket}`, "")
         .replace(/\//g, "");
 }
-function getDate(backup) {
-    const date = getBackupName(backup).replace(/_\d+/, "");
+function getDate(backup, bucket) {
+    const date = getBackupName(backup, bucket).replace(/_\d+/, "");
     return new Date(date);
 }
-function getBackupInfo(backup) {
-    const name = getBackupName(backup);
-    const potential_path = path.join(env_1.default.DATASTORE_BACKUP_DIR, name);
+function getBackupInfo(backup, backupDir, bucket) {
+    const name = getBackupName(backup, bucket);
+    const potential_path = path.join(backupDir, name);
     const exists = fs.existsSync(path.resolve(potential_path));
     return { exists, path: potential_path };
 }
 let GsUtilResolver = class GsUtilResolver {
-    async getProjectId() {
-        return env_1.default.PROJECT_ID;
+    async getProjectId({ env }) {
+        return env.PROJECT_ID;
     }
-    async getBackups() {
-        const { stdout, stderr } = await execAsync(`gsutil ls gs://${env_1.default.DATASTORE_BACKUP_BUCKET}`);
+    async getBackups({ env }) {
+        const { stdout, stderr } = await execAsync(`gsutil ls gs://${env.DATASTORE_BACKUP_BUCKET}`);
         const backups = stdout
             .trim()
             .split(/\n/)
             .map((backup) => {
             return {
                 id: (0, removeTrailingSlash_1.default)(backup),
-                name: getBackupName(backup),
-                date: getDate(backup),
-                ...getBackupInfo(backup),
+                name: getBackupName(backup, env.DATASTORE_BACKUP_BUCKET),
+                date: getDate(backup, env.DATASTORE_BACKUP_BUCKET),
+                ...getBackupInfo(backup, env.DATASTORE_BACKUP_DIR, env.DATASTORE_BACKUP_BUCKET),
             };
         });
         if (stderr) {
@@ -82,8 +81,8 @@ let GsUtilResolver = class GsUtilResolver {
         }
         return backups;
     }
-    async startBackup() {
-        const command = `gcloud datastore export gs://${env_1.default.DATASTORE_BACKUP_BUCKET} --project='${env_1.default.PROJECT_ID}' --format=json`;
+    async startBackup({ env }) {
+        const command = `gcloud datastore export gs://${env.DATASTORE_BACKUP_BUCKET} --project='${env.PROJECT_ID}' --format=json`;
         const { stdout, stderr } = await execAsync(command);
         if (stderr) {
             throw new Error(stderr);
@@ -92,9 +91,9 @@ let GsUtilResolver = class GsUtilResolver {
         const timestamp = outputUrlPrefix.split("/").pop();
         return timestamp;
     }
-    async downloadBackup(name) {
-        const backup_bucket = env_1.default.DATASTORE_BACKUP_BUCKET;
-        const outputDir = path.join(env_1.default.DATASTORE_BACKUP_DIR, name);
+    async downloadBackup(name, { env }) {
+        const backup_bucket = env.DATASTORE_BACKUP_BUCKET;
+        const outputDir = path.join(env.DATASTORE_BACKUP_DIR, name);
         const command = `gsutil -o GSUtil:parallel_process_count=1 -m cp -r "gs://${backup_bucket}/${name}/${name}.overall_export_metadata" "gs://${backup_bucket}/${name}/all_namespaces/" ${outputDir}`;
         fs.mkdirSync(outputDir);
         const { stderr } = await execAsync(command);
@@ -103,9 +102,9 @@ let GsUtilResolver = class GsUtilResolver {
         }
         return name;
     }
-    async importBackup(name) {
-        const input_url = path.join(env_1.default.DATASTORE_BACKUP_DIR, `${name}/${name}.overall_export_metadata`);
-        const url = `${env_1.default.DATASTORE_PROJECT_URL}:import`;
+    async importBackup(name, { env }) {
+        const input_url = path.join(env.DATASTORE_BACKUP_DIR, `${name}/${name}.overall_export_metadata`);
+        const url = `${env.DATASTORE_PROJECT_URL}:import`;
         const command = `curl -d '{"input_url": "${input_url}"}' -H 'Content-Type: application/json' -X POST ${url}`;
         const { stderr } = await execAsync(command);
         if (stderr) {
@@ -116,38 +115,43 @@ let GsUtilResolver = class GsUtilResolver {
 };
 __decorate([
     (0, type_graphql_1.Query)(() => String),
+    __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], GsUtilResolver.prototype, "getProjectId", null);
 __decorate([
     (0, type_graphql_1.Query)(() => [types_1.DatastoreBackup]),
     (0, ValidateEnv_1.default)(['DATASTORE_BACKUP_BUCKET']),
+    __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], GsUtilResolver.prototype, "getBackups", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => String),
     (0, ValidateEnv_1.default)(['DATASTORE_BACKUP_BUCKET', 'PROJECT_ID']),
+    __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], GsUtilResolver.prototype, "startBackup", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => String),
     (0, ValidateEnv_1.default)(['DATASTORE_BACKUP_BUCKET', 'DATASTORE_BACKUP_DIR']),
     __param(0, (0, type_graphql_1.Arg)("name")),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], GsUtilResolver.prototype, "downloadBackup", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => String),
     (0, ValidateEmulatorRunning_1.default)(),
     __param(0, (0, type_graphql_1.Arg)("name")),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], GsUtilResolver.prototype, "importBackup", null);
 GsUtilResolver = __decorate([

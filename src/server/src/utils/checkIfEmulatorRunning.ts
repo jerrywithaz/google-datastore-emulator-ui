@@ -6,15 +6,15 @@ const execAsync = promisify(exec);
 async function checkIfEmulatorRunning() {
   try {
     const { stderr, stdout } = await execAsync(
-      `curl -X GET -L ${process.env.DATASTORE_EMULATOR_HOST}`
+      `curl --write-out '%{http_code}' --silent --output /dev/null -X GET -L ${process.env.DATASTORE_EMULATOR_HOST}`
     );
+
+    if (stdout.trim() === '200') {
+      return true;
+    }
 
     if (stderr) {
       return false;
-    }
-
-    if (stdout === "ok") {
-      return true;
     }
 
     return false;

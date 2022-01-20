@@ -15,15 +15,27 @@ const resolver_2 = __importDefault(require("./schema/namespaces/resolver"));
 const resolver_3 = __importDefault(require("./schema/entities/resolver"));
 const scalars_1 = require("./schema/entities/scalars");
 const resolver_4 = __importDefault(require("./schema/gsutil/resolver"));
+const env_1 = __importDefault(require("./env"));
 function setEnv({ projectId, emulatorHost, port, backupBucket, backupDir }) {
     process.env.PROJECT_ID = projectId;
     process.env.DATASTORE_EMULATOR_HOST = emulatorHost;
     process.env.SERVER_PORT = port.toString();
     process.env.DATASTORE_BACKUP_BUCKET = backupBucket;
     process.env.DATASTORE_BACKUP_DIR = backupDir;
+    const env = ["PROJECT_ID", "DATASTORE_EMULATOR_HOST", "SERVER_PORT", "DATASTORE_BACKUP_BUCKET", "DATASTORE_BACKUP_DIR"];
+    for (const key of env) {
+        const element = process.env[key];
+        if (element) {
+            console.log("✅", key, element);
+        }
+        else {
+            console.log("❌", key, element);
+        }
+    }
 }
 async function boostrap({ projectId, emulatorHost, port, backupBucket, backupDir }) {
     setEnv({ projectId, emulatorHost, port, backupBucket, backupDir });
+    const env = (0, env_1.default)();
     const app = (0, express_1.default)();
     const httpServer = http_1.default.createServer(app);
     const datastore = (0, datastore_1.default)();
@@ -45,7 +57,7 @@ async function boostrap({ projectId, emulatorHost, port, backupBucket, backupDir
     app.use((0, cors_1.default)());
     const server = new apollo_server_express_1.ApolloServer({
         schema,
-        context: { datastore },
+        context: { datastore, env },
         introspection: true,
         plugins: [
             process.env.NODE_ENV === "production"
