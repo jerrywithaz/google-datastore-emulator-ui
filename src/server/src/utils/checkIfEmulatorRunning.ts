@@ -1,13 +1,12 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import env from "../env";
 
 const execAsync = promisify(exec);
 
 async function checkIfEmulatorRunning() {
   try {
     const { stderr, stdout } = await execAsync(
-      `curl -X GET -L ${env.DATASTORE_EMULATOR_HOST}`
+      `curl -X GET -L ${process.env.DATASTORE_EMULATOR_HOST}`
     );
 
     if (stderr) {

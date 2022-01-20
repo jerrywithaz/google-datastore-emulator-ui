@@ -1,5 +1,5 @@
 import { Arg, Mutation, Query, Resolver } from "type-graphql";
-import { exec, spawn, spawnSync } from "child_process";
+import { exec } from "child_process";
 import { promisify } from "util";
 import { DatastoreBackup } from "./types";
 import removeTrailingSlash from "../../utils/removeTrailingSlash";

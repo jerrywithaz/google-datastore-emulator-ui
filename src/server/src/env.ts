@@ -16,28 +16,6 @@ const {
   DATASTORE_BACKUP_DIR,
 } = process.env;
 
-if (!DATASTORE_EMULATOR_HOST) {
-  throw new Error(
-    "DATASTORE_EMULATOR_HOST environment variable has not been set."
-  );
-}
-
-if (!PROJECT_ID) {
-  throw new Error("PROJECT_ID environment variable has not been set.");
-}
-
-if (!DATASTORE_BACKUP_BUCKET) {
-  throw new Error(
-    "DATASTORE_BACKUP_BUCKET environment variable has not been set."
-  );
-}
-
-if (!DATASTORE_BACKUP_DIR) {
-  throw new Error(
-    "DATASTORE_BACKUP_DIR environment variable has not been set."
-  );
-}
-
 const DATASTORE_EMULATOR_PORT = Number(
   DATASTORE_EMULATOR_HOST.match(/\d+/)![0]
 );
