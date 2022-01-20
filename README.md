@@ -51,6 +51,6 @@ Options:
 ```
 
 ## Screenshots
-![Entities](screenshots/Screen Shot 2022-01-20 at 11.36.10 AM.png)
+![Entities](screenshots/entities.png)
 
-![Backups](screenshots/Screen Shot 2022-01-20 at 11.35.15 AM.png)
+![Backups](screenshots/backups.png)
