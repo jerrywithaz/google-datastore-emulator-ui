@@ -49,3 +49,8 @@ Options:
   -p, --port <port>             The port to run the express server on (default: process.env.SERVER_PORT || "8002")
   -h, --help                    display help for command
 ```
+
+## Screenshots
+![Entities](screenshots/Screen Shot 2022-01-20 at 11.36.10 AM.png)
+
+![Backups](screenshots/Screen Shot 2022-01-20 at 11.35.15 AM.png)
