@@ -7,6 +7,8 @@ import React, { useState } from "react";
 import useBackups from "../../hooks/useBackups";
 import useImportBackup from "../../hooks/useImportBackup";
 import useDownloadBackup from "../../hooks/useDownloadBackup";
+import useStartBackup from "../../hooks/useStartBackup";
+import useProjectId from "../../hooks/useProjectId";
 
 type ImportBackupOptions = {
   importBackup: (name: string) => void;
@@ -89,11 +91,19 @@ const createColumns = (
 
 const Backups: React.FC = () => {
   const { data, loading, error, refetch } = useBackups();
+  const { data: projectIdData } = useProjectId();
   const [importBackup, { loading: importingBackup }] = useImportBackup();
   const [downloadBackup, { loading: downloadingBackup }] = useDownloadBackup();
+  const [startBackup, { loading: startingBackup }] = useStartBackup();
 
   const [importing, setImporting] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
+
+  const createBackup = () => {
+    startBackup().then(() => {
+      refetch();
+    });
+  };
 
   const backup = (name: string) => {
     setImporting(name);
@@ -132,33 +142,53 @@ const Backups: React.FC = () => {
   );
 
   return (
-    <Box height={600} width="100%" marginTop="20px">
-      <DataGrid
-        columns={columns}
-        rows={data?.getBackups ?? []}
-        loading={loading}
-        paginationMode="client"
-        pagination
-        pageSize={10}
-        sortModel={[{ field: "date", sort: "desc" }]}
-        disableSelectionOnClick
-        components={{
-          NoRowsOverlay: () => {
-            return (
-              <Stack height="100%" alignItems="center" justifyContent="center">
-                {error?.message ?? "No rows backups found."}
-              </Stack>
-            );
-          },
-          NoResultsOverlay: () => {
-            return (
-              <Stack height="100%" alignItems="center" justifyContent="center">
-                {error?.message ?? "No rows backups found."}
-              </Stack>
-            );
-          },
-        }}
-      />
+    <Box width="100%" height="100%">
+      {projectIdData && (
+        <Button
+          startIcon={startingBackup ? <CircularProgress size={12} /> : null}
+          variant="contained"
+          onClick={createBackup}
+          disabled={startingBackup}
+        >
+          {startingBackup ? `Creating Backup of ${projectIdData.getProjectId}` : `Create Backup of ${projectIdData.getProjectId}`}
+        </Button>
+      )}
+      <Box height={600} width="100%" marginTop="20px">
+        <DataGrid
+          columns={columns}
+          rows={data?.getBackups ?? []}
+          loading={loading}
+          paginationMode="client"
+          pagination
+          pageSize={10}
+          sortModel={[{ field: "date", sort: "desc" }]}
+          disableSelectionOnClick
+          components={{
+            NoRowsOverlay: () => {
+              return (
+                <Stack
+                  height="100%"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {error?.message ?? "No rows backups found."}
+                </Stack>
+              );
+            },
+            NoResultsOverlay: () => {
+              return (
+                <Stack
+                  height="100%"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {error?.message ?? "No rows backups found."}
+                </Stack>
+              );
+            },
+          }}
+        />
+      </Box>
     </Box>
   );
 };

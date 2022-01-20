@@ -15,6 +15,14 @@ or
 yarn global add google-datastore-emulator-ui
 ```
 
+## Environment Variables
+
+`DATASTORE_EMULATOR_HOST` - The host nd port of your google cloud emulator that is currently running such as `http://localhost:8097`
+`DATASTORE_BACKUP_BUCKET` - The name of the google cloud storage folder that your backups write to.
+`DATASTORE_BACKUP_DIR` - The full path to you backups folder such as `/Users/zhogan/Documents/Code/Personal/google-datastore-emulator-ui/gcloud_datastore/backups`
+`PROJECT_ID` - The google datastore project id.
+`SERVER_PORT` - The port for the google-datastore-emulator-ui server to run on.
+
 ## Usage
 
 Run 
@@ -28,12 +36,12 @@ google-datastore-emulator-ui -i my-project-id -e http://localhost:8097
 ```sh
 Usage: google-datastore-emulator-ui [command]
 
-Commands:
-
-  -v, --version, version                Outputs the version number
-  -h, --help, help                      Outputs usage information
-
-  -i, --id, id                          The id of your google datastore instance
-  -e, --emulator-host, emulator host    The host url of your local emulator such as http://localhost:8003
-  -p, --port <port>, express app port   The port for express to run on such as 8002
+Options:
+  -V, --version                 output the version number
+  -i, --id <project>            The id of the google datastore project. (default: process.env.PROJECT_ID)
+  -e, --emulator-host <host>    The url of the emulator (default: process.env.DATASTORE_EMULATOR_HOST)
+  -b, --backup-bucket <bucket>  The google cloud storage backup bucket (default: process.env.DATASTORE_BACKUP_BUCKET)
+  -d, --backup-dir <dir>        The google cloud storage backup bucket (default: process.env.DATASTORE_BACKUP_DIR)
+  -p, --port <port>             The port to run the express server on (default: process.env.SERVER_PORT || "8002")
+  -h, --help                    display help for command
 ```

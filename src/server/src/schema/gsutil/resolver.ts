@@ -32,6 +32,11 @@ function getBackupInfo(backup: string) {
 
 @Resolver()
 class GsUtilResolver {
+  @Query(() => String)
+  async getProjectId(): Promise<string> {
+    return env.PROJECT_ID;
+  }
+
   @Query(() => [DatastoreBackup])
   async getBackups(): Promise<DatastoreBackup[]> {
     const { stdout, stderr } = await execAsync(
@@ -55,6 +60,25 @@ class GsUtilResolver {
     }
 
     return backups;
+  }
+
+  @Mutation(() => String)
+  async startBackup(): Promise<string> {
+    const command = `gcloud datastore export gs://${env.DATASTORE_BACKUP_BUCKET} --project='${env.PROJECT_ID}' --format=json`;
+
+    const { stdout, stderr } = await execAsync(command);
+
+    if (stderr) {
+      throw new Error(stderr);
+    }
+
+    const {
+      metadata: { outputUrlPrefix },
+    } = JSON.parse(stdout);
+
+    const timestamp = outputUrlPrefix.split("/").pop();
+
+    return timestamp;
   }
 
   @Mutation(() => String)

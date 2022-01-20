@@ -42,8 +42,9 @@ async function main() {
         .version(packageJson.version)
         .requiredOption('-i, --id <project>', 'The id of the google datastore project.', process.env.PROJECT_ID)
         .requiredOption('-e, --emulator-host <host>', 'The url of the emulator', process.env.DATASTORE_EMULATOR_HOST)
+        .requiredOption('-b, --backup-bucket <bucket>', 'The google cloud storage backup bucket', process.env.DATASTORE_BACKUP_BUCKET || '')
+        .requiredOption('-d, --backup-dir <dir>', 'The google cloud storage backup bucket', process.env.DATASTORE_BACKUP_DIR || '')
         .option('-p, --port <port>', 'The port to run the express server on', process.env.SERVER_PORT || '8002')
-        .option('-b, --backup-bucket <bucket>', 'The google cloud storage backup bucket', process.env.DATASTORE_BACKUP_BUCKET || '')
         .option('-D, --dev', 'Run in dev mode', process.env.NODE_ENV === 'development')
         .parse(process.argv);
     
