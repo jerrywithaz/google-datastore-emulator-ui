@@ -21,7 +21,7 @@ yarn global add google-datastore-emulator-ui
 
 `DATASTORE_BACKUP_BUCKET` - The name of the google cloud storage folder that your backups write to.
 
-`DATASTORE_BACKUP_DIR` - The full path to you backups folder such as `/Users/zhogan/Documents/Code/Personal/google-datastore-emulator-ui/gcloud_datastore/backups`
+`DATASTORE_BACKUP_DIR` - The full path to you backups folder such as `/Users/zhogan/Documents/Code/Personal/my-other-project/gcloud_datastore/backups`
 
 `PROJECT_ID` - The google datastore project id.
 
@@ -32,7 +32,7 @@ yarn global add google-datastore-emulator-ui
 Run 
 
 ```sh
-google-datastore-emulator-ui -i my-project-id -e http://localhost:8097 -b my-backups-bucket -d /Users/zhogan/Documents/Code/Personal/google-datastore-emulator-ui/gcloud_datastore/backups
+google-datastore-emulator-ui -i my-project-id -e http://localhost:8097 -b my-backups-bucket -d /Users/zhogan/Documents/Code/Personal/my-other-project/gcloud_datastore/backups
 ```
 
 ## Cli Options
