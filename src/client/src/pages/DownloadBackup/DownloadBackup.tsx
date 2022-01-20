@@ -6,12 +6,29 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import React, { useState } from "react";
 import useBackups from "../../hooks/useBackups";
 import useImportBackup from "../../hooks/useImportBackup";
+import useDownloadBackup from "../../hooks/useDownloadBackup";
+
+type ImportBackupOptions = {
+  importBackup: (name: string) => void;
+  importingBackup: boolean;
+  currentlyImportingBackup: string | null;
+};
+
+type DownloadBackupOptions = {
+  downloadBackup: (name: string) => void;
+  downloadingBackup: boolean;
+  currentlyDownloadingBackup: string | null;
+};
 
 const createColumns = (
-  importBackup: (name: string) => void,
-  importingBackup: boolean,
-  currentBackup: string | null
+  importBackupOptions: ImportBackupOptions,
+  downloadBackupOptions: DownloadBackupOptions
 ): GridColDef[] => {
+  const { importBackup, importingBackup, currentlyImportingBackup } =
+    importBackupOptions;
+  const { downloadBackup, downloadingBackup, currentlyDownloadingBackup } =
+    downloadBackupOptions;
+
   return [
     { field: "name", headerName: "Name", flex: 1 },
     {
@@ -31,9 +48,15 @@ const createColumns = (
       headerName: "Download",
       flex: 1,
       renderCell: (params) => {
+        const importing =
+          downloadingBackup && params.row.name === currentlyDownloadingBackup;
         return (
-          <Button disabled={params.row.exists} variant="contained">
-            Download
+          <Button
+            disabled={params.row.exists || downloadingBackup}
+            variant="contained"
+            onClick={() => downloadBackup(params.row.name)}
+          >
+            {importing ? "Downloading" : "Download"}
           </Button>
         );
       },
@@ -45,14 +68,13 @@ const createColumns = (
       headerName: "Import",
       flex: 1,
       renderCell: (params) => {
-          const importing = importingBackup && params.row.name === currentBackup;
+        const importing =
+          importingBackup && params.row.name === currentlyImportingBackup;
         return (
           <Button
             disabled={!params.row.exists || importingBackup}
             variant="contained"
-            onClick={() =>
-              importBackup(params.row.name)
-            }
+            onClick={() => importBackup(params.row.name)}
             startIcon={importing ? <CircularProgress size={12} /> : null}
           >
             {importing ? "Importing" : "Import"}
@@ -66,25 +88,47 @@ const createColumns = (
 };
 
 const DownloadBackup: React.FC = () => {
-  const { data, loading, error } = useBackups();
-  const [importBackup, { loading: importingBackup }] =
-    useImportBackup();
+  const { data, loading, error, refetch } = useBackups();
+  const [importBackup, { loading: importingBackup }] = useImportBackup();
+  const [downloadBackup, { loading: downloadingBackup }] = useDownloadBackup();
 
   const [importing, setImporting] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<string | null>(null);
 
   const backup = (name: string) => {
     setImporting(name);
-    importBackup({ variables: { name }}).then(() => {
+    importBackup({ variables: { name } })
+      .then(() => {
         setImporting(null);
-    }).catch(() => {
+      })
+      .catch(() => {
         setImporting(null);
-    });
+      });
+  };
+
+  const download = (name: string) => {
+    setDownloading(name);
+    downloadBackup({ variables: { name } })
+      .then(() => {
+        setDownloading(null);
+        refetch();
+      })
+      .catch(() => {
+        setDownloading(null);
+      });
   };
 
   const columns = createColumns(
-    backup,
-    importingBackup,
-    importing
+    {
+      importBackup: backup,
+      importingBackup,
+      currentlyImportingBackup: importing,
+    },
+    {
+      downloadBackup: download,
+      downloadingBackup,
+      currentlyDownloadingBackup: downloading,
+    }
   );
 
   return (

@@ -58,6 +58,24 @@ class GsUtilResolver {
   }
 
   @Mutation(() => String)
+  async downloadBackup(@Arg("name") name: string): Promise<string> {
+    const backup_bucket = env.DATASTORE_BACKUP_BUCKET;
+    const outputDir = path.join(env.DATASTORE_BACKUP_DIR, name);
+
+    const command = `gsutil -o GSUtil:parallel_process_count=1 -m cp -r "gs://${backup_bucket}/${name}/${name}.overall_export_metadata" "gs://${backup_bucket}/${name}/all_namespaces/" ${outputDir}`;
+
+    fs.mkdirSync(outputDir);
+
+    const { stderr } = await execAsync(command);
+
+    if (stderr) {
+      throw new Error(stderr);
+    }
+
+    return name;
+  }
+
+  @Mutation(() => String)
   async importBackup(@Arg("name") name: string): Promise<string> {
     const input_url = path.join(
       env.DATASTORE_BACKUP_DIR,
@@ -70,7 +88,7 @@ class GsUtilResolver {
     const { stderr } = await execAsync(command);
 
     if (stderr) {
-        throw new Error(stderr);
+      throw new Error(stderr);
     }
 
     return name;
