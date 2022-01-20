@@ -87,7 +87,7 @@ const createColumns = (
   ];
 };
 
-const DownloadBackup: React.FC = () => {
+const Backups: React.FC = () => {
   const { data, loading, error, refetch } = useBackups();
   const [importBackup, { loading: importingBackup }] = useImportBackup();
   const [downloadBackup, { loading: downloadingBackup }] = useDownloadBackup();
@@ -163,4 +163,4 @@ const DownloadBackup: React.FC = () => {
   );
 };
 
-export default DownloadBackup;
+export default Backups;

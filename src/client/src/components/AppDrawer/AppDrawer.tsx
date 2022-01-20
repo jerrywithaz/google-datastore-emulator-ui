@@ -4,7 +4,6 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import BackupIcon from "@mui/icons-material/Backup";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from "react-router-dom";
@@ -13,8 +12,7 @@ type AppDrawerProps = { drawerOpen: boolean; drawerWidth: number };
 
 const links = [
   { text: "Entities", Icon: SearchIcon, link: "/" },
-  { text: "Import/Export", Icon: BackupIcon, link: "/import-export" },
-  { text: "Download Backup", Icon: CloudDownloadIcon, link: "download-backup" },
+  { text: "Backups", Icon: CloudDownloadIcon, link: "backups" },
 ];
 
 const AppDrawer: React.FC<AppDrawerProps> = ({ drawerOpen, drawerWidth }) => {
