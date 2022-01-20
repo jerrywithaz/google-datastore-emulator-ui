@@ -42,6 +42,8 @@ const removeTrailingSlash_1 = __importDefault(require("../../utils/removeTrailin
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const env_1 = __importDefault(require("../../env"));
+const ValidateEmulatorRunning_1 = __importDefault(require("../../decorators/ValidateEmulatorRunning"));
+const ValidateEnv_1 = __importDefault(require("../../decorators/ValidateEnv"));
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
 function getBackupName(backup) {
     return backup
@@ -120,18 +122,21 @@ __decorate([
 ], GsUtilResolver.prototype, "getProjectId", null);
 __decorate([
     (0, type_graphql_1.Query)(() => [types_1.DatastoreBackup]),
+    (0, ValidateEnv_1.default)(['DATASTORE_BACKUP_BUCKET']),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], GsUtilResolver.prototype, "getBackups", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => String),
+    (0, ValidateEnv_1.default)(['DATASTORE_BACKUP_BUCKET', 'PROJECT_ID']),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], GsUtilResolver.prototype, "startBackup", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => String),
+    (0, ValidateEnv_1.default)(['DATASTORE_BACKUP_BUCKET', 'DATASTORE_BACKUP_DIR']),
     __param(0, (0, type_graphql_1.Arg)("name")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -139,6 +144,7 @@ __decorate([
 ], GsUtilResolver.prototype, "downloadBackup", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => String),
+    (0, ValidateEmulatorRunning_1.default)(),
     __param(0, (0, type_graphql_1.Arg)("name")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

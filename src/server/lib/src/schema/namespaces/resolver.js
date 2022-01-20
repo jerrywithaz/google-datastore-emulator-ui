@@ -16,6 +16,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const type_graphql_1 = require("type-graphql");
+const ValidateEmulatorRunning_1 = __importDefault(require("../../decorators/ValidateEmulatorRunning"));
 const isNullOrUndefined_1 = __importDefault(require("../../utils/isNullOrUndefined"));
 let NamespaceResolver = class NamespaceResolver {
     async getNamespaces({ datastore }) {
@@ -29,6 +30,7 @@ let NamespaceResolver = class NamespaceResolver {
 };
 __decorate([
     (0, type_graphql_1.Query)(() => [String]),
+    (0, ValidateEmulatorRunning_1.default)(),
     __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

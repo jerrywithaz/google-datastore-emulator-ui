@@ -1,6 +1,6 @@
 {
   "name": "google-datastore-emulator-ui",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -14,6 +14,7 @@
     "build": "npm run clean && npm run build:scripts && npm run build:client && npm run build:server",
     "prepublishOnly": "npm run build",
     "serve:client": "serve -s src/client/build",
+    "serve": "serve",
     "dev:client": "cd src/client && npm run start",
     "dev:server": "nodemon src/server/scripts/dev.ts",
     "build:scripts": "tsc -P tsconfig.json",

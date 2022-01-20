@@ -16,6 +16,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const type_graphql_1 = require("type-graphql");
+const ValidateEmulatorRunning_1 = __importDefault(require("../../decorators/ValidateEmulatorRunning"));
 const isNullOrUndefined_1 = __importDefault(require("../../utils/isNullOrUndefined"));
 const normalizeAndSortColumns_1 = __importDefault(require("../../utils/normalizeAndSortColumns"));
 const enums_1 = require("./enums");
@@ -116,6 +117,7 @@ __decorate([
 ], EntitiesResolver.prototype, "getOperators", null);
 __decorate([
     (0, type_graphql_1.Query)(() => types_1.EntitiesResult),
+    (0, ValidateEmulatorRunning_1.default)(),
     __param(0, (0, type_graphql_1.Arg)("input", { nullable: false })),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
@@ -124,6 +126,7 @@ __decorate([
 ], EntitiesResolver.prototype, "getEntities", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => types_1.Entity),
+    (0, ValidateEmulatorRunning_1.default)(),
     __param(0, (0, type_graphql_1.Arg)("input", { nullable: false })),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
