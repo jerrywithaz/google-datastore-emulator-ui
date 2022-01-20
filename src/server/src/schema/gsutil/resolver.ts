@@ -1,42 +1,42 @@
-import { Query, Resolver } from "type-graphql";
-import { exec } from "child_process";
+import { Arg, Mutation, Query, Resolver } from "type-graphql";
+import { exec, spawn, spawnSync } from "child_process";
 import { promisify } from "util";
 import { DatastoreBackup } from "./types";
 import removeTrailingSlash from "../../utils/removeTrailingSlash";
 import * as fs from "fs";
 import * as path from "path";
+import got from "got";
+import env from "../../env";
 
 const execAsync = promisify(exec);
 
-function getDate(backup: string, bucket: string) {
-  const date = backup
-    .replace(`gs://${bucket}`, "")
-    .replace(/_\d+/, "")
+function getBackupName(backup: string) {
+  return backup
+    .replace(`gs://${env.DATASTORE_BACKUP_BUCKET}`, "")
     .replace(/\//g, "");
+}
+
+function getDate(backup: string) {
+  const date = getBackupName(backup).replace(/_\d+/, "");
 
   return new Date(date);
 }
 
-function getBackupInfo(backup: string, bucket: string) {
-  const backup_dir = process.env.DATASTORE_BACKUP_DIR;
+function getBackupInfo(backup: string) {
+  const name = getBackupName(backup);
+  const potential_path = path.join(env.DATASTORE_BACKUP_DIR, name);
+  const exists = fs.existsSync(path.resolve(potential_path));
 
-  if (backup_dir) {
-    const name = backup.replace(`gs://${bucket}`, "");
-    const potential_path = path.join(backup_dir, name);
-    const exists = fs.existsSync(path.resolve(potential_path));
-
-    return { exists, path: potential_path };
-  }
-  return { exists: false, path: undefined };
+  return { exists, path: potential_path };
 }
 
 @Resolver()
 class GsUtilResolver {
   @Query(() => [DatastoreBackup])
   async getBackups(): Promise<DatastoreBackup[]> {
-    const bucket = process.env.DATASTORE_BACKUP_BUCKET;
-
-    const { stdout, stderr } = await execAsync(`gsutil ls gs://${bucket}`);
+    const { stdout, stderr } = await execAsync(
+      `gsutil ls gs://${env.DATASTORE_BACKUP_BUCKET}`
+    );
 
     const backups = stdout
       .trim()
@@ -44,9 +44,9 @@ class GsUtilResolver {
       .map((backup) => {
         return {
           id: removeTrailingSlash(backup),
-          name: removeTrailingSlash(backup),
-          date: getDate(backup, bucket as string),
-          ...getBackupInfo(backup, bucket as string),
+          name: getBackupName(backup),
+          date: getDate(backup),
+          ...getBackupInfo(backup),
         };
       });
 
@@ -55,6 +55,25 @@ class GsUtilResolver {
     }
 
     return backups;
+  }
+
+  @Mutation(() => String)
+  async importBackup(@Arg("name") name: string): Promise<string> {
+    const input_url = path.join(
+      env.DATASTORE_BACKUP_DIR,
+      `${name}/${name}.overall_export_metadata`
+    );
+    const url = `${env.DATASTORE_PROJECT_URL}:import`;
+
+    const command = `curl -d '{"input_url": "${input_url}"}' -H 'Content-Type: application/json' -X POST ${url}`;
+
+    const { stderr } = await execAsync(command);
+
+    if (stderr) {
+        throw new Error(stderr);
+    }
+
+    return name;
   }
 }
 
