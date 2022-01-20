@@ -32,7 +32,7 @@ function setEnv({ projectId, emulatorHost, port, backupBucket, backupDir }: Boos
 
 async function boostrap({ projectId, emulatorHost, port, backupBucket, backupDir }: BoostrapOptions) {
   setEnv({ projectId, emulatorHost, port, backupBucket, backupDir });
-
+  
   const app = express();
   const httpServer = http.createServer(app);
   const datastore = createDatastore();

@@ -170,6 +170,7 @@ const Backups: React.FC = () => {
                   height="100%"
                   alignItems="center"
                   justifyContent="center"
+                  whiteSpace="pre"
                 >
                   {error?.message ?? "No rows backups found."}
                 </Stack>
@@ -181,6 +182,7 @@ const Backups: React.FC = () => {
                   height="100%"
                   alignItems="center"
                   justifyContent="center"
+                  whiteSpace="pre"
                 >
                   {error?.message ?? "No rows backups found."}
                 </Stack>

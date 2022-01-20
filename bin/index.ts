@@ -42,22 +42,22 @@ async function main() {
 
   program
     .version(packageJson.version)
-    .requiredOption(
+    .option(
       "-i, --id <project>",
       "The id of the google datastore project.",
       process.env.PROJECT_ID
     )
-    .requiredOption(
+    .option(
       "-e, --emulator-host <host>",
       "The url of the emulator",
       process.env.DATASTORE_EMULATOR_HOST
     )
-    .requiredOption(
+    .option(
       "-b, --backup-bucket <bucket>",
       "The google cloud storage backup bucket",
       process.env.DATASTORE_BACKUP_BUCKET || ""
     )
-    .requiredOption(
+    .option(
       "-d, --backup-dir <dir>",
       "The google cloud storage backup bucket",
       process.env.DATASTORE_BACKUP_DIR || ""

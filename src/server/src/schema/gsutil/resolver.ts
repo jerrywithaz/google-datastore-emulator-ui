@@ -5,8 +5,9 @@ import { DatastoreBackup } from "./types";
 import removeTrailingSlash from "../../utils/removeTrailingSlash";
 import * as fs from "fs";
 import * as path from "path";
-import got from "got";
 import env from "../../env";
+import ValidateEmulatorRunning from "../../decorators/ValidateEmulatorRunning";
+import ValidateEnv from "../../decorators/ValidateEnv";
 
 const execAsync = promisify(exec);
 
@@ -38,6 +39,7 @@ class GsUtilResolver {
   }
 
   @Query(() => [DatastoreBackup])
+  @ValidateEnv(['DATASTORE_BACKUP_BUCKET'])
   async getBackups(): Promise<DatastoreBackup[]> {
     const { stdout, stderr } = await execAsync(
       `gsutil ls gs://${env.DATASTORE_BACKUP_BUCKET}`
@@ -63,6 +65,7 @@ class GsUtilResolver {
   }
 
   @Mutation(() => String)
+  @ValidateEnv(['DATASTORE_BACKUP_BUCKET', 'PROJECT_ID'])
   async startBackup(): Promise<string> {
     const command = `gcloud datastore export gs://${env.DATASTORE_BACKUP_BUCKET} --project='${env.PROJECT_ID}' --format=json`;
 
@@ -82,6 +85,7 @@ class GsUtilResolver {
   }
 
   @Mutation(() => String)
+  @ValidateEnv(['DATASTORE_BACKUP_BUCKET', 'DATASTORE_BACKUP_DIR'])
   async downloadBackup(@Arg("name") name: string): Promise<string> {
     const backup_bucket = env.DATASTORE_BACKUP_BUCKET;
     const outputDir = path.join(env.DATASTORE_BACKUP_DIR, name);
@@ -100,6 +104,7 @@ class GsUtilResolver {
   }
 
   @Mutation(() => String)
+  @ValidateEmulatorRunning()
   async importBackup(@Arg("name") name: string): Promise<string> {
     const input_url = path.join(
       env.DATASTORE_BACKUP_DIR,

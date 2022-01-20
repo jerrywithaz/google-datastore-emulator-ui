@@ -1,5 +1,6 @@
 import { Key } from "@google-cloud/datastore";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import ValidateEmulatorRunning from "../../decorators/ValidateEmulatorRunning";
 import { Context } from "../../types";
 import isNullOrUndefined from "../../utils/isNullOrUndefined";
 import normalizeAndSortColumns from "../../utils/normalizeAndSortColumns";
@@ -26,6 +27,7 @@ class EntitiesResolver {
   }
 
   @Query(() => EntitiesResult)
+  @ValidateEmulatorRunning()
   async getEntities(
     @Arg("input", { nullable: false })
     { kind, page, pageSize, filters, sortModel }: GetEntitiesInput,
@@ -98,6 +100,7 @@ class EntitiesResolver {
   }
 
   @Mutation(() => Entity)
+  @ValidateEmulatorRunning()
   async updateEntity(
     @Arg("input", { nullable: false }) { path, updates }: UpdateEntityInput,
     @Ctx() { datastore }: Context

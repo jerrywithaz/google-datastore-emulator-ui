@@ -3,13 +3,19 @@ import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import useKinds from "../../hooks/useKinds";
 import useEntitiesByKind from "../../hooks/useEntitiesByKind";
-import { DataGrid, GridCellEditCommitParams, GridCellParams, GridColDef } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridCellEditCommitParams,
+  GridCellParams,
+  GridColDef,
+} from "@mui/x-data-grid";
 import { LabelDisplayedRowsArgs } from "@material-ui/core";
 import { FilterModel, SortModel } from "../../types/graphql";
 import useUpdateEntity from "../../hooks/useUpdateEntity";
 import EntityDrawer from "./EntityDrawer";
 import EntityKinds from "./EntityKinds";
 import EntityFilters from "./EntityFilters";
+import Stack from "@mui/material/Stack";
 
 function isObjectOrArray(
   value: any
@@ -31,7 +37,11 @@ const Entities: React.FC = () => {
   const [sortModel, setSortModel] = useState<SortModel[] | null>(null);
   const [currentCell, setCurrentCell] = useState<GridCellParams | null>(null);
 
-  const { data: kindsData, loading: isLoadingKinds } = useKinds({
+  const {
+    data: kindsData,
+    loading: isLoadingKinds,
+    error: kindsError,
+  } = useKinds({
     onCompleted: (data) => {
       if (!kind) setKind(data.getKinds[0]);
     },
@@ -42,7 +52,11 @@ const Entities: React.FC = () => {
   const {
     result: [
       fetchEntities,
-      { data: getEntitiesData, loading: isLoadingEntities },
+      {
+        data: getEntitiesData,
+        loading: isLoadingEntities,
+        error: entitiesError,
+      },
     ],
     changePage,
     page,
@@ -57,6 +71,8 @@ const Entities: React.FC = () => {
 
   const { getEntities: entitiesData } = getEntitiesData ?? {};
 
+  const error = kindsError ?? entitiesError;
+
   const entities = useMemo(() => {
     if (entitiesData?.entities) {
       return entitiesData?.entities.map(({ entity, key, path }) => {
@@ -65,7 +81,6 @@ const Entities: React.FC = () => {
     }
     return [];
   }, [entitiesData?.entities]);
-
 
   const dataGridColumns = useMemo<GridColDef[]>(() => {
     const columns: GridColDef[] = (entitiesData?.columns || []).map((key) => {
@@ -133,47 +148,52 @@ const Entities: React.FC = () => {
       return entitiesData.columns.map((key) => ({
         label: key,
         value: key,
-        type: entitiesData.typesMap[key]
+        type: entitiesData.typesMap[key],
       }));
     }
     return [];
   }, [entitiesData]);
 
-  const onCellEditCommit = useCallback(async (data: GridCellEditCommitParams) => {
-    if (currentCell) {
-      const { value, field } = data;
-      const type = entitiesData?.typesMap[field];
-      const isArrayOrObject = type === "array" || type === "object";
+  const onCellEditCommit = useCallback(
+    async (data: GridCellEditCommitParams) => {
+      if (currentCell) {
+        const { value, field } = data;
+        const type = entitiesData?.typesMap[field];
+        const isArrayOrObject = type === "array" || type === "object";
 
-      try {
-        const updates = {
-          [field]: isArrayOrObject
-            ? JSON.parse(value as any)
-            : value instanceof Date
+        try {
+          const updates = {
+            [field]: isArrayOrObject
+              ? JSON.parse(value as any)
+              : value instanceof Date
               ? value
               : value,
-        };
+          };
 
-        const path = currentCell.row.__path;
-  
-        await updateEntity({
-          variables: {
-            input: {
-              path,
-              updates,
+          const path = currentCell.row.__path;
+
+          await updateEntity({
+            variables: {
+              input: {
+                path,
+                updates,
+              },
             },
-          },
-        });
-      } catch (error) {
-        console.error(error);
+          });
+        } catch (error) {
+          console.error(error);
+        }
       }
-    }
-  }, [currentCell, entitiesData?.typesMap, updateEntity]);
+    },
+    [currentCell, entitiesData?.typesMap, updateEntity]
+  );
 
   useEffect(() => {
     if (kind) fetchEntities();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortModel, kind]);
+
+  console.log(kindsError ?? entitiesError);
 
   return (
     <Box>
@@ -219,6 +239,32 @@ const Entities: React.FC = () => {
               nextIconButtonProps: {
                 disabled: false,
               },
+            },
+          }}
+          components={{
+            NoRowsOverlay: () => {
+              return (
+                <Stack
+                  height="100%"
+                  alignItems="center"
+                  justifyContent="center"
+                  whiteSpace="pre"
+                >
+                  {error?.message ?? "No entities found"}
+                </Stack>
+              );
+            },
+            NoResultsOverlay: () => {
+              return (
+                <Stack
+                  height="100%"
+                  alignItems="center"
+                  justifyContent="center"
+                  whiteSpace="pre"
+                >
+                  {error?.message ?? "No entities found"}
+                </Stack>
+              );
             },
           }}
           onSortModelChange={(sortModel) =>
