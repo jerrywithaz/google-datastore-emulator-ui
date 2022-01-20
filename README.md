@@ -18,9 +18,13 @@ yarn global add google-datastore-emulator-ui
 ## Environment Variables
 
 `DATASTORE_EMULATOR_HOST` - The host nd port of your google cloud emulator that is currently running such as `http://localhost:8097`
+
 `DATASTORE_BACKUP_BUCKET` - The name of the google cloud storage folder that your backups write to.
+
 `DATASTORE_BACKUP_DIR` - The full path to you backups folder such as `/Users/zhogan/Documents/Code/Personal/google-datastore-emulator-ui/gcloud_datastore/backups`
+
 `PROJECT_ID` - The google datastore project id.
+
 `SERVER_PORT` - The port for the google-datastore-emulator-ui server to run on.
 
 ## Usage
