@@ -6,6 +6,7 @@
   "types": "lib/index.d.ts",
   "homepage": "https://github.com/jerrywithaz/google-datastore-emulator-ui",
   "issues": "https://github.com/jerrywithaz/google-datastore-emulator-ui/issues",
+  "keywords": ["google", "google-datastore-emulator", "google-datastore", "google-console-admin", "datastore", "emulator", "google-cloud"],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rm -rf lib",
